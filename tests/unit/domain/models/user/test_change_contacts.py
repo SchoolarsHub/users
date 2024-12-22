@@ -119,9 +119,7 @@ def test_change_contacts_with_invalid_email(uow_tracker: FakeUowTracker[User]) -
         gender="male",
     )
     with pytest.raises(ContactsValidationError):
-        new_contacts = Contacts(phone_number=None, email=2)
-
-    user.change_contacts(contacts=new_contacts)
+        user.change_contacts(Contacts(phone_number=None, email=2))
 
     assert uow_tracker.dirty.get(User) is None
 
@@ -142,9 +140,7 @@ def test_change_contacts_with_invalid_phone_number(uow_tracker: FakeUowTracker[U
         gender="male",
     )
     with pytest.raises(ContactsValidationError):
-        new_contacts = Contacts(phone_number="2", email="XXXXXXXXXXXXXXXXXX")
-
-    user.change_contacts(contacts=new_contacts)
+        user.change_contacts(Contacts(phone_number="2", email="XXXXXXXXXXXXXXXXXX"))
 
     assert uow_tracker.dirty.get(User) is None
 
@@ -165,8 +161,6 @@ def test_change_user_contacts_with_null_email_and_phone(uow_tracker: FakeUowTrac
         gender="male",
     )
     with pytest.raises(ContactsValidationError):
-        new_contacts = Contacts(phone_number=None, email=None)
-
-    user.change_contacts(contacts=new_contacts)
+        user.change_contacts(Contacts(phone_number=None, email=None))
 
     assert uow_tracker.dirty.get(User) is None

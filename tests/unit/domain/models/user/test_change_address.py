@@ -56,11 +56,12 @@ def test_change_address_with_invalid_address(uow_tracker: FakeUowTracker[User]) 
         gender="male",
     )
     with pytest.raises(AddressValidationError):
-        new_address = Address(
-            country=242,
-            city=23,
-            street=None,
-            house_number="Jhon",
-            postal_code=None,
+        user.change_address(
+            Address(
+                country=242,
+                city=23,
+                street=None,
+                house_number="Jhon",
+                postal_code=None,
+            )
         )
-    user.change_address(new_address)
