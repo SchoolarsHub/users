@@ -48,7 +48,8 @@ ignore = [
     "ARG001", # Unused function argument: `code`
     "ARG002", # Unused method argument: `now`
     "ISC001", # Implicitly concatenated string literals on one line
-    "COM812", # Explicitly concatenated string should be implicitly concatenated
+    "COM812", # Explicitly concatenated string should be implicitly concatenated,
+    "PLR0913", #Too many arguments in function definition
 ]
 
 [lint.pydocstyle]
