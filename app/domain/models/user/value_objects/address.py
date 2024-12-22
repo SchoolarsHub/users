@@ -21,10 +21,10 @@ class Address:
         if not self.street or not isinstance(self.street, str):
             raise AddressValidationError("Street must be a non-empty string")
 
-        if not isinstance(self.house_number, int) or self.house_number <= 0:
+        if not self.house_number or not isinstance(self.house_number, int):
             raise AddressValidationError("House number must be a positive integer")
 
-        if not isinstance(self.postal_code, int) or self.postal_code <= 0:
+        if not self.postal_code or not isinstance(self.postal_code, int):
             raise AddressValidationError("Postal code must be a positive integer")
 
     def __str__(self) -> str:

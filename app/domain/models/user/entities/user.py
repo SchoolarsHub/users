@@ -21,7 +21,7 @@ class User(UowedEntity[UUID]):
         contacts: Contacts,
         address: Address | None = None,
         gender: str | None = None,
-        birt_date: date | None = None,
+        birth_date: date | None = None,
     ) -> None:
         super().__init__(user_id, unit_of_work)
 
@@ -30,7 +30,7 @@ class User(UowedEntity[UUID]):
         self.contacts = contacts
         self.address = address
         self.gender = gender
-        self.birt_date = birt_date
+        self.birth_date = birth_date
 
     @classmethod
     def create_user(
@@ -72,6 +72,7 @@ class User(UowedEntity[UUID]):
 
     def change_username(self, username: str) -> None:
         self.username = username
+        self.mark_dirty()
 
     def change_contacts(self, contacts: Contacts) -> None:
         self.contacts = contacts
@@ -84,15 +85,19 @@ class User(UowedEntity[UUID]):
                 aggregate_uuid=self.entity_id,
             )
         )
+        self.mark_dirty()
 
     def change_gender(self, gender: str) -> None:
         self.gender = gender
+        self.mark_dirty()
 
     def change_address(self, address: Address) -> None:
         self.address = address
+        self.mark_dirty()
 
     def change_birth_date(self, birth_date: date) -> None:
         self.birt_date = birth_date
+        self.mark_dirty()
 
     def delete_user(self) -> None:
         self.mark_deleted()
