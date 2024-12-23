@@ -9,7 +9,7 @@ from app.domain.models.user.value_objects.contacts import Contacts
 from tests.mocks.unit_of_work import FakeUowTracker
 
 
-def test_change_address(uow_tracker: FakeUowTracker[User]) -> None:
+def test_change_address(uow_tracker: FakeUowTracker) -> None:
     user = User(
         user_id=uuid4(),
         unit_of_work=uow_tracker,
@@ -40,7 +40,7 @@ def test_change_address(uow_tracker: FakeUowTracker[User]) -> None:
     assert user.address.street == new_address.street
 
 
-def test_change_address_with_invalid_address(uow_tracker: FakeUowTracker[User]) -> None:
+def test_change_address_with_invalid_address(uow_tracker: FakeUowTracker) -> None:
     user = User(
         user_id=uuid4(),
         unit_of_work=uow_tracker,

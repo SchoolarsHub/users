@@ -10,7 +10,7 @@ from app.domain.models.user.value_objects.contacts import Contacts
 from tests.mocks.unit_of_work import FakeUowTracker
 
 
-def test_create_with_address(uow_tracker: FakeUowTracker[User]) -> None:
+def test_create_with_address(uow_tracker: FakeUowTracker) -> None:
     user = User.create_user(
         user_id=uuid4(),
         unit_of_work=uow_tracker,
@@ -47,7 +47,7 @@ def test_create_with_address(uow_tracker: FakeUowTracker[User]) -> None:
     assert uow_tracker.new.get(User) == user
 
 
-def test_create_without_address(uow_tracker: FakeUowTracker[User]) -> None:
+def test_create_without_address(uow_tracker: FakeUowTracker) -> None:
     user = User.create_user(
         user_id=uuid4(),
         unit_of_work=uow_tracker,
@@ -73,7 +73,7 @@ def test_create_without_address(uow_tracker: FakeUowTracker[User]) -> None:
     assert uow_tracker.new.get(User) == user
 
 
-def test_create_user_without_address(uow_tracker: FakeUowTracker[User]) -> None:
+def test_create_user_without_address(uow_tracker: FakeUowTracker) -> None:
     user = User.create_user(
         user_id=uuid4(),
         unit_of_work=uow_tracker,
@@ -101,7 +101,7 @@ def test_create_user_without_address(uow_tracker: FakeUowTracker[User]) -> None:
     assert uow_tracker.new.get(User) == user
 
 
-def test_create_user_with_invalid_email(uow_tracker: FakeUowTracker[User]) -> None:
+def test_create_user_with_invalid_email(uow_tracker: FakeUowTracker) -> None:
     with pytest.raises(ContactsValidationError):
         User.create_user(
             user_id=uuid4(),
@@ -121,7 +121,7 @@ def test_create_user_with_invalid_email(uow_tracker: FakeUowTracker[User]) -> No
     assert uow_tracker.dirty.get(User) is None
 
 
-def test_create_user_with_invalid_phone_number(uow_tracker: FakeUowTracker[User]) -> None:
+def test_create_user_with_invalid_phone_number(uow_tracker: FakeUowTracker) -> None:
     with pytest.raises(ContactsValidationError):
         User.create_user(
             user_id=uuid4(),
@@ -141,7 +141,7 @@ def test_create_user_with_invalid_phone_number(uow_tracker: FakeUowTracker[User]
     assert uow_tracker.dirty.get(User) is None
 
 
-def test_create_user_with_invalid_address(uow_tracker: FakeUowTracker[User]) -> None:
+def test_create_user_with_invalid_address(uow_tracker: FakeUowTracker) -> None:
     with pytest.raises(AddressValidationError):
         User.create_user(
             user_id=uuid4(),

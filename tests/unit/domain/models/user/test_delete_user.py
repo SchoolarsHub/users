@@ -7,7 +7,7 @@ from app.domain.models.user.value_objects.contacts import Contacts
 from tests.mocks.unit_of_work import FakeUowTracker
 
 
-def test_delete_user(uow_tracker: FakeUowTracker[User]) -> None:
+def test_delete_user(uow_tracker: FakeUowTracker) -> None:
     user = User(
         user_id=uuid4(),
         unit_of_work=uow_tracker,

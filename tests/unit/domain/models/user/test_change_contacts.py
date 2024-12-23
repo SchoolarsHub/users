@@ -10,7 +10,7 @@ from app.domain.models.user.value_objects.contacts import Contacts
 from tests.mocks.unit_of_work import FakeUowTracker
 
 
-def test_change_user_contacts(uow_tracker: FakeUowTracker[User]) -> None:
+def test_change_user_contacts(uow_tracker: FakeUowTracker) -> None:
     user = User(
         user_id=uuid4(),
         unit_of_work=uow_tracker,
@@ -41,7 +41,7 @@ def test_change_user_contacts(uow_tracker: FakeUowTracker[User]) -> None:
     assert uow_tracker.dirty.get(User) == user
 
 
-def test_change_contacts_with_null_email(uow_tracker: FakeUowTracker[User]) -> None:
+def test_change_contacts_with_null_email(uow_tracker: FakeUowTracker) -> None:
     user = User(
         user_id=uuid4(),
         unit_of_work=uow_tracker,
@@ -72,7 +72,7 @@ def test_change_contacts_with_null_email(uow_tracker: FakeUowTracker[User]) -> N
     assert uow_tracker.dirty.get(User) == user
 
 
-def test_change_contacts_with_null_phone_number(uow_tracker: FakeUowTracker[User]) -> None:
+def test_change_contacts_with_null_phone_number(uow_tracker: FakeUowTracker) -> None:
     user = User(
         user_id=uuid4(),
         unit_of_work=uow_tracker,
@@ -103,7 +103,7 @@ def test_change_contacts_with_null_phone_number(uow_tracker: FakeUowTracker[User
     assert uow_tracker.dirty.get(User) == user
 
 
-def test_change_contacts_with_invalid_email(uow_tracker: FakeUowTracker[User]) -> None:
+def test_change_contacts_with_invalid_email(uow_tracker: FakeUowTracker) -> None:
     user = User(
         user_id=uuid4(),
         unit_of_work=uow_tracker,
@@ -124,7 +124,7 @@ def test_change_contacts_with_invalid_email(uow_tracker: FakeUowTracker[User]) -
     assert uow_tracker.dirty.get(User) is None
 
 
-def test_change_contacts_with_invalid_phone_number(uow_tracker: FakeUowTracker[User]) -> None:
+def test_change_contacts_with_invalid_phone_number(uow_tracker: FakeUowTracker) -> None:
     user = User(
         user_id=uuid4(),
         unit_of_work=uow_tracker,
@@ -145,7 +145,7 @@ def test_change_contacts_with_invalid_phone_number(uow_tracker: FakeUowTracker[U
     assert uow_tracker.dirty.get(User) is None
 
 
-def test_change_user_contacts_with_null_email_and_phone(uow_tracker: FakeUowTracker[User]) -> None:
+def test_change_user_contacts_with_null_email_and_phone(uow_tracker: FakeUowTracker) -> None:
     user = User(
         user_id=uuid4(),
         unit_of_work=uow_tracker,
