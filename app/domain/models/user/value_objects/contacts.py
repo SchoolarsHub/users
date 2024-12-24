@@ -2,7 +2,7 @@ from app.domain.models.user.exceptions.user_exceptions import ContactsValidation
 
 
 class Contacts:
-    def __init__(self, phone_number: int | None, email: str | None) -> None:
+    def __init__(self, phone_number: int | None = None, email: str | None = None) -> None:
         self.phone_number = phone_number
         self.email = email
 
