@@ -1,6 +1,8 @@
+from datetime import UTC, datetime
 from typing import Self
 from uuid import UUID
 
+from app.domain.models.user.value_objects.file_data import FileData
 from app.domain.shared.unit_of_work import UnitOfWorkTracker
 from app.domain.shared.uowed_entity import UowedEntity
 
@@ -11,14 +13,26 @@ class Avatar(UowedEntity[Self]):
         avatar_id: UUID,
         user_id: UUID,
         unit_of_work: UnitOfWorkTracker[Self],
+        file_data: FileData,
+        uploaded_at: datetime,
     ) -> None:
         super().__init__(avatar_id, unit_of_work)
 
         self.user_id = user_id
+        self.file_data = file_data
+        self.uploaded_at = uploaded_at
 
     @classmethod
-    def create_avatar(cls: type[Self], user_id: UUID, unit_of_work: UnitOfWorkTracker[Self], avatar_id: UUID) -> Self:
-        avatar = cls(avatar_id=avatar_id, user_id=user_id, unit_of_work=unit_of_work)
+    def create_avatar(
+        cls: type[Self], user_id: UUID, unit_of_work: UnitOfWorkTracker[Self], avatar_id: UUID, file_data: FileData
+    ) -> Self:
+        avatar = cls(
+            avatar_id=avatar_id,
+            user_id=user_id,
+            unit_of_work=unit_of_work,
+            file_data=file_data,
+            uploaded_at=datetime.now(UTC),
+        )
         avatar.mark_new()
 
         return avatar
