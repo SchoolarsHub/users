@@ -2,6 +2,8 @@ from datetime import UTC, datetime
 from typing import Self
 from uuid import UUID
 
+from app.domain.models.user.entities.avatar import Avatar
+from app.domain.models.user.entities.linked_account import LinkedAccount
 from app.domain.shared.event import Event
 from app.domain.shared.unit_of_work import UnitOfWorkTracker
 from app.domain.shared.uowed_entity import UowedEntity
@@ -20,6 +22,8 @@ class User(UowedEntity[UUID]):
         my_friendship_requests: list[Self],
         friendship_requests_to_me: list[Self],
         blocked_users: list[Self],
+        avatars: list[Avatar],
+        linked_accounts: list[LinkedAccount],
         bio: str | None = None,
     ) -> None:
         super().__init__(user_id, unit_of_work)
@@ -33,6 +37,8 @@ class User(UowedEntity[UUID]):
         self.friendship_requests_to_me = friendship_requests_to_me
         self.blocked_users = blocked_users
         self.bio = bio
+        self.avatars = avatars
+        self.linked_accounts = linked_accounts
 
         self._events: list[Event] = []
 

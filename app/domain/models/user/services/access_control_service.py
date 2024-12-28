@@ -17,20 +17,25 @@ class AccessControlService:
             )
 
         blocker.blocked_users.append(will_blocked)
-        blocker.subscribers.remove(will_blocked)
-        blocker.subscribed_to.remove(will_blocked)
-        blocker.my_friendship_requests.remove(will_blocked)
-        blocker.frineds.remove(will_blocked)
-        blocker.friendship_requests_to_me.remove(will_blocked)
 
-        will_blocked.subscribers.remove(blocker)
-        will_blocked.subscribed_to.remove(blocker)
-        will_blocked.my_friendship_requests.remove(blocker)
-        will_blocked.frineds.remove(blocker)
-        will_blocked.friendship_requests_to_me.remove(blocker)
+        self._remove_user_relational_data(blocker, will_blocked)
+        self._remove_user_relational_data(will_blocked, blocker)
 
     def unblock_user(self, blocker: User, blocked: User) -> None:
         if blocked not in blocker.blocked_users:
             raise BlockedUserNotFoundError(title=f"User {blocker.entity_id} does not block user {blocked.entity_id}")
 
         blocker.blocked_users.remove(blocked)
+
+    def _remove_user_relational_data(self, user: User, target: User) -> None:
+        relationships = [
+            user.subscribers,
+            user.subscribed_to,
+            user.my_friendship_requests,
+            user.frineds,
+            user.friendship_requests_to_me,
+        ]
+
+        for relationship in relationships:
+            if target in relationship:
+                relationship.remove(target)
