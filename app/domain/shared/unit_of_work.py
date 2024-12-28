@@ -1,16 +1,16 @@
 from abc import abstractmethod
-from typing import Protocol
+from typing import Any, Protocol
 
 
-class UnitOfWorkTracker[EntityT](Protocol):
+class UnitOfWorkTracker(Protocol):
     @abstractmethod
-    def register_new(self, entity: EntityT) -> None:
+    def register_new(self, entity: Any) -> None:
         raise NotImplementedError
 
     @abstractmethod
-    def register_dirty(self, entity: EntityT) -> None:
+    def register_dirty(self, entity: Any) -> None:
         raise NotImplementedError
 
     @abstractmethod
-    def register_deleted(self, entity: EntityT) -> None:
+    def register_deleted(self, entity: Any) -> None:
         raise NotImplementedError

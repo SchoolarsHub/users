@@ -12,7 +12,7 @@ class LinkedAccount(UowedEntity[UUID]):
         self,
         linked_account_id: UUID,
         user_id: UUID,
-        unit_of_work: UnitOfWorkTracker[Self],
+        unit_of_work: UnitOfWorkTracker,
         social_network: SocialNetworks,
         connection_link: str,
         connected_at: datetime,
@@ -31,7 +31,7 @@ class LinkedAccount(UowedEntity[UUID]):
         linked_account_id: UUID,
         social_network: SocialNetworks,
         connection_link: str,
-        unit_of_work: UnitOfWorkTracker[Self],
+        unit_of_work: UnitOfWorkTracker,
     ) -> Self:
         linked_account = cls(
             linked_account_id=linked_account_id,

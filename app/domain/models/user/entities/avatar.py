@@ -12,7 +12,7 @@ class Avatar(UowedEntity[Self]):
         self,
         avatar_id: UUID,
         user_id: UUID,
-        unit_of_work: UnitOfWorkTracker[Self],
+        unit_of_work: UnitOfWorkTracker,
         file_data: FileData,
         uploaded_at: datetime,
     ) -> None:
@@ -24,7 +24,7 @@ class Avatar(UowedEntity[Self]):
 
     @classmethod
     def create_avatar(
-        cls: type[Self], user_id: UUID, unit_of_work: UnitOfWorkTracker[Self], avatar_id: UUID, file_data: FileData
+        cls: type[Self], user_id: UUID, unit_of_work: UnitOfWorkTracker, avatar_id: UUID, file_data: FileData
     ) -> Self:
         avatar = cls(
             avatar_id=avatar_id,
