@@ -7,17 +7,6 @@ from app.domain.models.user.entities.linked_account import LinkedAccount
 from app.domain.models.user.enums.account_statuses import AccountStatuses
 from app.domain.models.user.enums.file_extensions import FileExtensions
 from app.domain.models.user.enums.social_networks import SocialNetworks
-from app.domain.models.user.events.avatar.avatar_added import AvatarAdded
-from app.domain.models.user.events.avatar.avatar_deleted import AvatarDeleted
-from app.domain.models.user.events.linked_account.social_network_linked import SocialNetworkLinked
-from app.domain.models.user.events.linked_account.social_network_unlinked import SocialNetworkUnlinked
-from app.domain.models.user.events.user.address_changed import AddressChanged
-from app.domain.models.user.events.user.bio_changed import BioChanged
-from app.domain.models.user.events.user.contacts_changed import ContactsChanged
-from app.domain.models.user.events.user.status_changed import StatusChanged
-from app.domain.models.user.events.user.user_created import UserCreated
-from app.domain.models.user.events.user.user_deleted import UserDeleted
-from app.domain.models.user.events.user.username_changed import UsernameChanged
 from app.domain.models.user.exceptions.avatar_exceptions import AvatarNotFoundError, InvalidAvatarFileExtensionError
 from app.domain.models.user.exceptions.linked_account_exceptions import (
     InvalidSocialNetworkError,
@@ -90,22 +79,7 @@ class User(UowedEntity[UUID]):
             account_status=AccountStatuses.ACTIVE,
         )
         user.mark_new()
-        user.record_event(
-            UserCreated(
-                event_name="UserCreated",
-                aggregate_name="User",
-                aggregate_uuid=user.entity_id,
-                user_id=user.entity_id,
-                username=user.username,
-                email=user.contacts.email,
-                phone=user.contacts.phone,
-                created_at=user.created_at,
-                account_status=user.account_status,
-                bio=user.bio,
-                city=user.address.city if user.address else None,
-                country=user.address.country if user.address else None,
-            )
-        )
+        user.record_event(...)
 
         return user
 
@@ -115,32 +89,15 @@ class User(UowedEntity[UUID]):
 
         self.account_status = account_status
         self.mark_dirty()
-        self.record_event(
-            StatusChanged(
-                event_name="StatusChanged",
-                aggregate_name="User",
-                aggregate_uuid=self.entity_id,
-                user_id=self.entity_id,
-                new_status=self.account_status,
-            )
-        )
+        self.record_event(...)
 
-    def change_address(self, address: Address | None = None) -> None:
+    def change_address(self, address: Address) -> None:
         if self.account_status == AccountStatuses.INACTIVE:
             raise UserInactiveError(title=f"User {self.entity_id} is inactive. ")
 
         self.address = address
         self.mark_dirty()
-        self.record_event(
-            AddressChanged(
-                event_name="AddressChanged",
-                aggregate_name="User",
-                aggregate_uuid=self.entity_id,
-                user_id=self.entity_id,
-                new_city=self.address.city if self.address else None,
-                new_country=self.address.country if self.address else None,
-            )
-        )
+        self.record_event(...)
 
     def change_username(self, username: str) -> None:
         if self.account_status == AccountStatuses.INACTIVE:
@@ -148,15 +105,7 @@ class User(UowedEntity[UUID]):
 
         self.username = username
         self.mark_dirty()
-        self.record_event(
-            UsernameChanged(
-                event_name="UsernameChanged",
-                aggregate_name="User",
-                aggregate_uuid=self.entity_id,
-                user_id=self.entity_id,
-                new_username=self.username,
-            )
-        )
+        self.record_event(...)
 
     def change_bio(self, bio: str | None = None) -> None:
         if self.account_status == AccountStatuses.INACTIVE:
@@ -164,15 +113,7 @@ class User(UowedEntity[UUID]):
 
         self.bio = bio
         self.mark_dirty()
-        self.record_event(
-            BioChanged(
-                event_name="BioChanged",
-                aggregate_name="User",
-                aggregate_uuid=self.entity_id,
-                user_id=self.entity_id,
-                new_bio=self.bio,
-            )
-        )
+        self.record_event(...)
 
     def change_contacts(self, contacts: Contacts) -> None:
         if self.account_status == AccountStatuses.INACTIVE:
@@ -180,16 +121,7 @@ class User(UowedEntity[UUID]):
 
         self.contacts = contacts
         self.mark_dirty()
-        self.record_event(
-            ContactsChanged(
-                event_name="ContactsChanged",
-                aggregate_name="User",
-                aggregate_uuid=self.entity_id,
-                user_id=self.entity_id,
-                new_email=self.contacts.email,
-                new_phone=self.contacts.phone,
-            )
-        )
+        self.record_event(...)
 
     def add_avatar(self, avatar_id: UUID, file_data: FileData, content: bytes) -> None:
         if self.account_status == AccountStatuses.INACTIVE:
@@ -202,19 +134,7 @@ class User(UowedEntity[UUID]):
             user_id=self.entity_id, unit_of_work=self.unit_of_work, avatar_id=avatar_id, file_data=file_data, content=content
         )
         self.avatars.append(avatar)
-        self.record_event(
-            AvatarAdded(
-                event_name="AvatarAdded",
-                aggregate_name="User",
-                aggregate_uuid=self.entity_id,
-                user_id=self.entity_id,
-                avatar_id=avatar.entity_id,
-                filename=avatar.file_data.filename,
-                file_extension=avatar.file_data.file_extension,
-                file_size=avatar.file_data.file_size,
-                uploaded_at=avatar.uploaded_at,
-            )
-        )
+        self.record_event(...)
 
     def remove_avatar(self, avatar_id: UUID) -> None:
         if self.account_status == AccountStatuses.INACTIVE:
@@ -223,15 +143,7 @@ class User(UowedEntity[UUID]):
         for avatar in self.avatars:
             if avatar.avatar_id == avatar_id:
                 avatar.mark_deleted()
-                self.record_event(
-                    AvatarDeleted(
-                        event_name="AvatarDeleted",
-                        aggregate_name="User",
-                        aggregate_uuid=self.entity_id,
-                        user_id=self.entity_id,
-                        avatar_id=avatar.entity_id,
-                    )
-                )
+                self.record_event(...)
                 break
 
         raise AvatarNotFoundError(f"Avatar with id {avatar_id} not found")
@@ -248,24 +160,10 @@ class User(UowedEntity[UUID]):
                 raise LinkedAccountUrlAlreadyExistsError(title=f"Linked account with url {conn_link} already exists. ")
 
         linked_account = LinkedAccount.create_linked_account(
-            user_id=self.entity_id,
-            unit_of_work=self.unit_of_work,
-            linked_account_id=linked_account_id,
-            social_network=social_netw,
-            connection_link=conn_link,
+            user_id=self.entity_id, unit_of_work=self.unit_of_work, linked_account_id=linked_account_id
         )
         self.linked_accounts.append(linked_account)
-        self.record_event(
-            SocialNetworkLinked(
-                event_name="SocialNetworkLinked",
-                aggregate_name="User",
-                aggregate_uuid=self.entity_id,
-                user_id=self.entity_id,
-                linked_account_id=linked_account.entity_id,
-                social_network_name=linked_account.social_network,
-                connection_link=linked_account.connection_link,
-            )
-        )
+        self.record_event(...)
 
     def remove_linked_account(self, linked_account_id: UUID) -> None:
         if self.account_status == AccountStatuses.INACTIVE:
@@ -274,15 +172,7 @@ class User(UowedEntity[UUID]):
         for linked_account in self.linked_accounts:
             if linked_account.linked_account_id == linked_account_id:
                 linked_account.mark_deleted()
-                self.record_event(
-                    SocialNetworkUnlinked(
-                        event_name="SocialNetworkUnlinked",
-                        aggregate_name="User",
-                        aggregate_uuid=self.entity_id,
-                        user_id=self.entity_id,
-                        linked_account_id=linked_account.entity_id,
-                    )
-                )
+                self.record_event(...)
                 break
 
         raise LinkedAccountNotFoundError(f"Linked account with id {linked_account_id} not found")
@@ -299,11 +189,4 @@ class User(UowedEntity[UUID]):
         for linked_account in self.linked_accounts:
             linked_account.delete_linked_account()
 
-        self.record_event(
-            UserDeleted(
-                event_name="UserDeleted",
-                aggregate_name="User",
-                aggregate_uuid=self.entity_id,
-                user_id=self.entity_id,
-            )
-        )
+        self.record_event(...)
