@@ -2,21 +2,21 @@ from datetime import UTC, datetime
 from typing import Self
 from uuid import UUID
 
-from app.domain.models.user.entities.avatar import Avatar
-from app.domain.models.user.entities.linked_account import LinkedAccount
-from app.domain.models.user.enums.account_statuses import AccountStatuses
-from app.domain.models.user.enums.file_extensions import FileExtensions
-from app.domain.models.user.enums.social_networks import SocialNetworks
-from app.domain.models.user.exceptions.avatar_exceptions import AvatarNotFoundError, InvalidAvatarFileExtensionError
-from app.domain.models.user.exceptions.linked_account_exceptions import (
+from app.domain.model.user.entities.avatar import Avatar
+from app.domain.model.user.entities.linked_account import LinkedAccount
+from app.domain.model.user.enums.account_statuses import AccountStatuses
+from app.domain.model.user.enums.file_extensions import FileExtensions
+from app.domain.model.user.enums.social_networks import SocialNetworks
+from app.domain.model.user.exceptions.avatar_exceptions import AvatarNotFoundError, InvalidAvatarFileExtensionError
+from app.domain.model.user.exceptions.linked_account_exceptions import (
     InvalidSocialNetworkError,
     LinkedAccountNotFoundError,
     LinkedAccountUrlAlreadyExistsError,
 )
-from app.domain.models.user.exceptions.user_exceptions import InvalidUserAccountStatusError, UserInactiveError
-from app.domain.models.user.value_objects.address import Address
-from app.domain.models.user.value_objects.contacts import Contacts
-from app.domain.models.user.value_objects.file_data import FileData
+from app.domain.model.user.exceptions.user_exceptions import InvalidUserAccountStatusError, UserInactiveError
+from app.domain.model.user.value_objects.address import Address
+from app.domain.model.user.value_objects.contacts import Contacts
+from app.domain.model.user.value_objects.file_data import FileData
 from app.domain.shared.event import Event
 from app.domain.shared.unit_of_work import UnitOfWorkTracker
 from app.domain.shared.uowed_entity import UowedEntity
@@ -31,12 +31,12 @@ class User(UowedEntity[UUID]):
         account_status: AccountStatuses,
         contacts: Contacts,
         unit_of_work: UnitOfWorkTracker,
-        friends: list[Self],
-        subscribers: list[Self],
-        subscribed_to: list[Self],
-        my_friendship_requests: list[Self],
-        friendship_requests_to_me: list[Self],
-        blocked_users: list[Self],
+        friends: list[UUID],
+        sended_friendship_requests: list[UUID],
+        received_friendship_requests: list[UUID],
+        subscribers: list[UUID],
+        subscriptions: list[UUID],
+        blocked_users: list[UUID],
         avatars: list[Avatar],
         linked_accounts: list[LinkedAccount],
         bio: str | None = None,
@@ -47,12 +47,12 @@ class User(UowedEntity[UUID]):
         self.username = username
         self.created_at = created_at
         self.frineds = friends
-        self.subscribers = subscribers
-        self.account_status = account_status
-        self.subscribed_to = subscribed_to
-        self.my_friendship_requests = my_friendship_requests
-        self.friendship_requests_to_me = friendship_requests_to_me
+        self.sended_friendship_requests = sended_friendship_requests
+        self.received_friendship_requests = received_friendship_requests
         self.blocked_users = blocked_users
+        self.subscribers = subscribers
+        self.subscriptions = subscriptions
+        self.account_status = account_status
         self.bio = bio
         self.avatars = avatars
         self.linked_accounts = linked_accounts

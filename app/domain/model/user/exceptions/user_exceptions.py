@@ -15,3 +15,7 @@ class AddressValidationError(DomainError):
 
 class ContactsValidationError(DomainError):
     pass
+
+
+class UserNotFoundError(DomainError):
+    pass

@@ -13,11 +13,7 @@ class CannotAddUserToFriendsTwiceError(DomainError):
     pass
 
 
-class YourFriendShipRequestAlreadyExistsError(DomainError):
-    pass
-
-
-class BlockerUserCannotAskForFriendshipError(DomainError):
+class BlockedUserCannotAskForFriendshipError(DomainError):
     pass
 
 
