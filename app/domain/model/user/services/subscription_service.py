@@ -30,10 +30,16 @@ class SubscriptionService:
             raise UserNotFoundError(title="Receiver not found")
 
         if subscriber.account_status == AccountStatuses.INACTIVE:
-            raise BlockedUserCannotSubscribeError(title="Inactiver user cannot subscribe")
+            raise UserInactiveError(title="Inactiver user cannot subscribe")
 
         if receiver.account_status == AccountStatuses.INACTIVE:
-            raise CannotSubscibeToBlockedUserError(title="Cannot subscribe to inactive user")
+            raise UserInactiveError(title="Cannot subscribe to inactive user")
+
+        if receiver.entity_id in subscriber.blocked_users:
+            raise CannotSubscibeToBlockedUserError(title="Cannot subscribe to blocked user")
+
+        if subscriber.entity_id in receiver.blocked_users:
+            raise BlockedUserCannotSubscribeError(title="Blocked user cannot subscribe")
 
         if receiver.entity_id in subscriber.subscriptions:
             raise SubscriptionAlreadyExistsError(title="Subscription already exists")
@@ -53,12 +59,6 @@ class SubscriptionService:
 
         if not receiver:
             raise UserNotFoundError(title="Receiver not found")
-
-        if subscriber.account_status == AccountStatuses.INACTIVE:
-            raise UserInactiveError(title="Inactiver user cannot unsubscribe")
-
-        if receiver.account_status == AccountStatuses.INACTIVE:
-            raise UserInactiveError(title="Cannot unsubscribe from inactive user")
 
         if receiver.entity_id not in subscriber.subscriptions:
             raise SubscriptionNotFoundError(title="Subscription not found")
