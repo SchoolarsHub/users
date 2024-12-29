@@ -17,7 +17,7 @@ class YourFriendShipRequestAlreadyExistsError(DomainError):
     pass
 
 
-class YouAreBlockedError(DomainError):
+class BlockerUserCannotAskForFriendshipError(DomainError):
     pass
 
 

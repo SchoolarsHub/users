@@ -1,10 +1,10 @@
 from app.domain.models.user.entities.user import User
 from app.domain.models.user.exceptions.friendship_exceptions import (
+    BlockerUserCannotAskForFriendshipError,
     CannotAddBlockedUserToFriendsError,
     CannotAddUserToFriendsTwiceError,
     CannotAddYourselfToFrinedsError,
     FriendshipRequestNotFoundError,
-    YouAreBlockedError,
     YourFriendShipRequestAlreadyExistsError,
 )
 
@@ -22,7 +22,7 @@ class FriendshipService:
             )
 
         if sender in receiver.blocked_users:
-            raise YouAreBlockedError(
+            raise BlockerUserCannotAskForFriendshipError(
                 title=f"User with id: {receiver.entity_id} blocked you, can't make friendsip request",
             )
 
