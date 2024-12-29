@@ -123,7 +123,7 @@ class User(UowedEntity[UUID]):
         self.mark_dirty()
         self.record_event(...)
 
-    def add_avatar(self, avatar_id: UUID, file_data: FileData) -> None:
+    def add_avatar(self, avatar_id: UUID, file_data: FileData, file: bytes) -> None:
         if self.account_status == AccountStatuses.INACTIVE:
             raise UserInactiveError(title=f"User {self.entity_id} is inactive. ")
 
@@ -131,7 +131,7 @@ class User(UowedEntity[UUID]):
             raise InvalidAvatarFileExtensionError(title=f"Invalid file extension: {file_data.file_extension}. ")
 
         avatar = Avatar.create_avatar(
-            user_id=self.entity_id, unit_of_work=self.unit_of_work, avatar_id=avatar_id, file_data=file_data
+            user_id=self.entity_id, unit_of_work=self.unit_of_work, avatar_id=avatar_id, file_data=file_data, file=file
         )
         self.avatars.append(avatar)
         self.record_event(...)
