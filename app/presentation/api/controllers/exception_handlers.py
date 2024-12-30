@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse
 from starlette import status
 
 from app.application.common.exception import ApplicationError
-from app.domain.common.exception import DomainError
+from app.domain.shared.exception import DomainError
 from app.presentation.api.controllers.responses import Data, ErrorResponse
 
 

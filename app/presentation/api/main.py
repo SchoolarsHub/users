@@ -1,8 +1,6 @@
 from fastapi import FastAPI
 
-from app.presentation.api.controllers.exception_handlers import (
-    default_error_handler,
-)
+from app.presentation.api.controllers.exception_handlers import default_error_handler
 from app.presentation.api.controllers.routers import healthcheck, redirect
 from app.presentation.api.middlewares.cors_middleware import setup_cors_middleware
 
