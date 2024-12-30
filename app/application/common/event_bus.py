@@ -1,7 +1,7 @@
 from abc import abstractmethod
 from typing import Protocol
 
-from app.domain.common.event import Event
+from app.domain.shared.event import Event
 
 
 class EventBus(Protocol):

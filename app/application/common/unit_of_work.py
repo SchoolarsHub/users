@@ -1,7 +1,7 @@
 from abc import abstractmethod
 from typing import Protocol
 
-from app.domain.common.unit_of_work import UnitOfWorkTracker
+from app.domain.shared.unit_of_work import UnitOfWorkTracker
 
 
 class UnitOfWorkCommiter(Protocol):

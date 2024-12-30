@@ -82,7 +82,7 @@ class FriendshipService:
 
         raise FriendshipRequestNotFoundError(title="Friendship request not found")
 
-    async def reject_friendship_request(self, sender_friendship_id: UUID, receiver_friendship_id: UUID) -> None:
+    async def decline_friendship_request(self, sender_friendship_id: UUID, receiver_friendship_id: UUID) -> None:
         if sender_friendship_id == receiver_friendship_id:
             raise CannotAddYourselfToFrinedsError(title="You cannot add yourself to friends")
 

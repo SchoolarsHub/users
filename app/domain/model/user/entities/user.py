@@ -33,29 +33,29 @@ class User(UowedEntity[UUID]):
         account_status: AccountStatuses,
         contacts: Contacts,
         unit_of_work: UnitOfWorkTracker,
-        friends: list[Friendship],
-        sended_friendship_requests: list[Friendship],
-        received_friendship_requests: list[Friendship],
-        subscribers: list[Subscribtion],
-        subscriptions: list[Subscribtion],
-        avatars: list[Avatar],
-        linked_accounts: list[LinkedAccount],
+        address: Address,
+        friends: list[Friendship] | None = None,
+        sended_friendship_requests: list[Friendship] | None = None,
+        received_friendship_requests: list[Friendship] | None = None,
+        subscribers: list[Subscribtion] | None = None,
+        subscriptions: list[Subscribtion] | None = None,
+        avatars: list[Avatar] | None = None,
+        linked_accounts: list[LinkedAccount] | None = None,
         bio: str | None = None,
-        address: Address | None = None,
     ) -> None:
         super().__init__(user_id, unit_of_work)
 
         self.username = username
         self.created_at = created_at
-        self.friends = friends
-        self.sended_friendship_requests = sended_friendship_requests
-        self.received_friendship_requests = received_friendship_requests
-        self.subscribers = subscribers
-        self.subscriptions = subscriptions
+        self.friends = friends if friends else []
+        self.sended_friendship_requests = sended_friendship_requests if sended_friendship_requests else []
+        self.received_friendship_requests = received_friendship_requests if received_friendship_requests else []
+        self.subscribers = subscribers if subscribers else []
+        self.subscriptions = subscriptions if subscriptions else []
         self.account_status = account_status
         self.bio = bio
-        self.avatars = avatars
-        self.linked_accounts = linked_accounts
+        self.avatars = avatars if avatars else []
+        self.linked_accounts = linked_accounts if linked_accounts else []
         self.address = address
         self.contacts = contacts
 
@@ -70,13 +70,17 @@ class User(UowedEntity[UUID]):
         return events
 
     @classmethod
-    def create_user(cls: type[Self], user_id: UUID, username: str, unit_of_work: UnitOfWorkTracker) -> Self:
+    def create_user(
+        cls: type[Self], uuid: UUID, username: str, unit_of_work: UnitOfWorkTracker, bio: str | None, city: str | None, country: str | None
+    ) -> Self:
         user = cls(
-            user_id=user_id,
+            user_id=uuid,
             username=username,
             created_at=datetime.now(UTC),
             unit_of_work=unit_of_work,
             account_status=AccountStatuses.ACTIVE,
+            bio=bio,
+            address=Address(city=city, country=country),
         )
         user.mark_new()
         user.record_event(...)
