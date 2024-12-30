@@ -2,7 +2,7 @@ from datetime import UTC, datetime
 from typing import Self
 from uuid import UUID
 
-from app.domain.models.user.enums.social_networks import SocialNetworks
+from app.domain.model.user.enums.social_networks import SocialNetworks
 from app.domain.shared.unit_of_work import UnitOfWorkTracker
 from app.domain.shared.uowed_entity import UowedEntity
 
