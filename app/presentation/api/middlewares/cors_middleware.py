@@ -7,6 +7,6 @@ def setup_cors_middleware(app: FastAPI) -> None:
         CORSMiddleware,
         allow_origins=["http://localhost:3000", "http//127.0.0.1:3000"],
         allow_credentials=True,
-        allow_methods=["POST", "GET", "PUT", "DELETE"],
+        allow_methods=["POST", "GET", "PUT"],
         allow_headers=["*"],
     )
