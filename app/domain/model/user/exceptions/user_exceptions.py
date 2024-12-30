@@ -19,3 +19,7 @@ class ContactsValidationError(DomainError):
 
 class UserNotFoundError(DomainError):
     pass
+
+
+class UserAlreadyExistsError(DomainError):
+    pass

@@ -8,23 +8,24 @@ from app.domain.model.user.repositories.user_repository import UserRepository
 
 
 @dataclass(frozen=True)
-class DeleteUserCommand:
+class ChangeBioCommand:
     user_id: UUID
+    bio: str | None
 
 
-class DeleteUser:
+class ChangeBio:
     def __init__(self, unit_of_work: UnitOfWork, repository: UserRepository, event_bus: EventBus) -> None:
         self.unit_of_work = unit_of_work
         self.repository = repository
         self.event_bus = event_bus
 
-    async def execute(self, command: DeleteUserCommand) -> None:
+    async def execute(self, command: ChangeBioCommand) -> None:
         user = await self.repository.with_id(uuid=command.user_id)
 
         if not user:
             raise UserNotFoundError(title=f"User with id: {command.user_id} does not exist")
 
-        user.delete_user()
+        user.change_bio(bio=command.bio)
 
         await self.event_bus.publish(events=user.raise_events())
         await self.unit_of_work.commit()

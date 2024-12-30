@@ -5,16 +5,10 @@ from app.domain.model.user.exceptions.user_exceptions import AddressValidationEr
 
 @dataclass(frozen=True)
 class Address:
-    city: str
-    country: str
+    city: str | None
+    country: str | None
 
     def __post_init__(self) -> None:
-        if not self.city:
-            raise AddressValidationError("City cannot be empty")
-
-        if not self.country:
-            raise AddressValidationError("Country cannot be empty")
-
         if not isinstance(self.city, str):
             raise AddressValidationError("City must be a string")
 

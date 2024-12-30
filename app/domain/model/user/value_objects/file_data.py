@@ -3,6 +3,8 @@ from dataclasses import dataclass
 from app.domain.model.user.enums.file_extensions import FileExtensions
 from app.domain.model.user.exceptions.avatar_exceptions import FileDataValidationError
 
+content: bytes = b"1"
+
 
 @dataclass(frozen=True)
 class FileData:

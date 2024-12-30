@@ -71,7 +71,15 @@ class User(UowedEntity[UUID]):
 
     @classmethod
     def create_user(
-        cls: type[Self], uuid: UUID, username: str, unit_of_work: UnitOfWorkTracker, bio: str | None, city: str | None, country: str | None
+        cls: type[Self],
+        uuid: UUID,
+        username: str,
+        unit_of_work: UnitOfWorkTracker,
+        bio: str | None,
+        city: str | None,
+        country: str | None,
+        phone: int | None,
+        email: str | None,
     ) -> Self:
         user = cls(
             user_id=uuid,
@@ -81,6 +89,7 @@ class User(UowedEntity[UUID]):
             account_status=AccountStatuses.ACTIVE,
             bio=bio,
             address=Address(city=city, country=country),
+            contacts=Contacts(phone=phone, email=email),
         )
         user.mark_new()
         user.record_event(...)
@@ -95,11 +104,11 @@ class User(UowedEntity[UUID]):
         self.mark_dirty()
         self.record_event(...)
 
-    def change_address(self, address: Address) -> None:
+    def change_address(self, city: str | None, country: str | None) -> None:
         if self.account_status == AccountStatuses.INACTIVE:
             raise UserInactiveError(title=f"User {self.entity_id} is inactive. ")
 
-        self.address = address
+        self.address = Address(city=city, country=country)
         self.mark_dirty()
         self.record_event(...)
 
@@ -119,11 +128,11 @@ class User(UowedEntity[UUID]):
         self.mark_dirty()
         self.record_event(...)
 
-    def change_contacts(self, contacts: Contacts) -> None:
+    def change_contacts(self, email: str | None, phone: int | None) -> None:
         if self.account_status == AccountStatuses.INACTIVE:
             raise UserInactiveError(title=f"User {self.entity_id} is inactive. ")
 
-        self.contacts = contacts
+        self.contacts = Contacts(phone=phone, email=email)
         self.mark_dirty()
         self.record_event(...)
 
