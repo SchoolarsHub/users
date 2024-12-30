@@ -2,12 +2,12 @@ from datetime import UTC, datetime
 from typing import Self
 from uuid import UUID
 
-from app.domain.models.user.value_objects.file_data import FileData
+from app.domain.model.user.value_objects.file_data import FileData
 from app.domain.shared.unit_of_work import UnitOfWorkTracker
 from app.domain.shared.uowed_entity import UowedEntity
 
 
-class Avatar(UowedEntity[Self]):
+class Avatar(UowedEntity[UUID]):
     def __init__(
         self,
         avatar_id: UUID,
