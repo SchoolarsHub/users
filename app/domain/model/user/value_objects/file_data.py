@@ -1,21 +1,16 @@
-from app.domain.models.user.enums.file_extensions import FileExtensions
-from app.domain.models.user.exceptions.avatar_exceptions import FileDataValidationError
+from dataclasses import dataclass
+
+from app.domain.model.user.enums.file_extensions import FileExtensions
+from app.domain.model.user.exceptions.avatar_exceptions import FileDataValidationError
 
 
+@dataclass(frozen=True)
 class FileData:
-    def __init__(
-        self,
-        filename: str,
-        file_extension: FileExtensions,
-        file_size: int,
-    ) -> None:
-        self.filename = filename
-        self.file_extension = file_extension
-        self.file_size = file_size
+    filename: str
+    file_extension: FileExtensions
+    file_size: int
 
-        self.validate()
-
-    def validate(self) -> None:
+    def __post_init__(self) -> None:
         if not self.filename:
             raise FileDataValidationError("Filename cannot be empty")
 

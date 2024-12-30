@@ -1,18 +1,14 @@
-from app.domain.models.user.exceptions.user_exceptions import AddressValidationError
+from dataclasses import dataclass
+
+from app.domain.model.user.exceptions.user_exceptions import AddressValidationError
 
 
+@dataclass(frozen=True)
 class Address:
-    def __init__(
-        self,
-        city: str,
-        country: str,
-    ) -> None:
-        self.city = city
-        self.country = country
+    city: str
+    country: str
 
-        self.validate()
-
-    def validate(self) -> None:
+    def __post_init__(self) -> None:
         if not self.city:
             raise AddressValidationError("City cannot be empty")
 

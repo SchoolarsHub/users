@@ -1,18 +1,14 @@
-from app.domain.models.user.exceptions.user_exceptions import ContactsValidationError
+from dataclasses import dataclass
+
+from app.domain.model.user.exceptions.user_exceptions import ContactsValidationError
 
 
+@dataclass(frozen=True)
 class Contacts:
-    def __init__(
-        self,
-        phone: int | None = None,
-        email: str | None = None,
-    ) -> None:
-        self.phone = phone
-        self.email = email
+    phone: int | None
+    email: str | None
 
-        self.validate()
-
-    def validate(self) -> None:
+    def __post_init__(self) -> None:
         if self.phone is None and self.email is None:
             raise ContactsValidationError("At least one contact must be provided")
 
