@@ -5,15 +5,7 @@ class CannotAddYourselfToFrinedsError(DomainError):
     pass
 
 
-class CannotAddBlockedUserToFriendsError(DomainError):
-    pass
-
-
 class CannotAddUserToFriendsTwiceError(DomainError):
-    pass
-
-
-class BlockedUserCannotAskForFriendshipError(DomainError):
     pass
 
 

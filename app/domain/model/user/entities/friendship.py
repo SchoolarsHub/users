@@ -44,5 +44,9 @@ class Friendship(UowedEntity[UUID]):
 
         return friendship
 
+    def change_friendship_status(self, new_status: FriendshipStatus) -> None:
+        self.friendship_status = new_status
+        self.mark_dirty()
+
     def delete_friendship(self) -> None:
         self.mark_deleted()
