@@ -3,15 +3,27 @@ from typing import Self
 from uuid import UUID
 
 from app.domain.model.user.entities.avatar import Avatar
+from app.domain.model.user.entities.friendship import Friendship
 from app.domain.model.user.entities.linked_account import LinkedAccount
+from app.domain.model.user.entities.subscribtion import Subscribtion
 from app.domain.model.user.enums.account_statuses import AccountStatuses
 from app.domain.model.user.enums.file_extensions import FileExtensions
 from app.domain.model.user.enums.social_networks import SocialNetworks
 from app.domain.model.user.exceptions.avatar_exceptions import AvatarNotFoundError, InvalidAvatarFileExtensionError
+from app.domain.model.user.exceptions.friendship_exceptions import CannotAddUserToFriendsTwiceError
 from app.domain.model.user.exceptions.linked_account_exceptions import (
     InvalidSocialNetworkError,
     LinkedAccountNotFoundError,
     LinkedAccountUrlAlreadyExistsError,
+)
+from app.domain.model.user.exceptions.subscription_exceptions import (
+    CannotRemoveFromSubscribersYourselfError,
+    CannotSubscibeToYourselfError,
+    CannotUnsubscribeFromYourselfError,
+    OnlySubscribersCanUnsubscribeError,
+    OnlySubscribtionsOwnerCanRemoveSubscriptionsError,
+    SubscriptionAlreadyExistsError,
+    SubscriptionNotFoundError,
 )
 from app.domain.model.user.exceptions.user_exceptions import InvalidUserAccountStatusError, UserInactiveError
 from app.domain.model.user.value_objects.address import Address
@@ -31,12 +43,11 @@ class User(UowedEntity[UUID]):
         account_status: AccountStatuses,
         contacts: Contacts,
         unit_of_work: UnitOfWorkTracker,
-        friends: list[UUID],
-        sended_friendship_requests: list[UUID],
-        received_friendship_requests: list[UUID],
-        subscribers: list[UUID],
-        subscriptions: list[UUID],
-        blocked_users: list[UUID],
+        friends: list[Friendship],
+        sended_friendship_requests: list[Friendship],
+        received_friendship_requests: list[Friendship],
+        subscribers: list[Subscribtion],
+        subscriptions: list[Subscribtion],
         avatars: list[Avatar],
         linked_accounts: list[LinkedAccount],
         bio: str | None = None,
@@ -46,10 +57,9 @@ class User(UowedEntity[UUID]):
 
         self.username = username
         self.created_at = created_at
-        self.frineds = friends
+        self.friends = friends
         self.sended_friendship_requests = sended_friendship_requests
         self.received_friendship_requests = received_friendship_requests
-        self.blocked_users = blocked_users
         self.subscribers = subscribers
         self.subscriptions = subscriptions
         self.account_status = account_status
@@ -82,6 +92,101 @@ class User(UowedEntity[UUID]):
         user.record_event(...)
 
         return user
+
+    def add_subscriber(self, subscribtion_id: UUID, subscriber_id: UUID, subscribed_at: datetime) -> None:
+        subscriber = Subscribtion(
+            subscription_id=subscribtion_id,
+            unit_of_work=self.unit_of_work,
+            subscriber_id=subscriber_id,
+            subscribed_to=self.entity_id,
+            subscribed_at=subscribed_at,
+        )
+        self.subscribers.append(subscriber)
+        self.record_event()
+
+    def subscribe_to_user(self, subscribe_to: UUID, subscription_id: UUID) -> None:
+        if self.account_status == AccountStatuses.INACTIVE:
+            raise UserInactiveError(title=f"User {self.entity_id} is inactive. ")
+
+        if self.entity_id == subscribe_to:
+            raise CannotSubscibeToYourselfError(title=f"User {self.entity_id} cannot subscribe to himself. ")
+
+        for subscribtions in self.subscriptions:
+            if subscribtions.subscribed_to == subscribe_to:
+                raise SubscriptionAlreadyExistsError(title=f"User {self.entity_id} already subscribed to user {subscribe_to}. ")
+
+        subscribtion = Subscribtion.create_subscribtion(
+            subscription_id=subscription_id, unit_of_work=self.unit_of_work, subscriber_id=self.entity_id, subscribed_to=subscribe_to
+        )
+
+        self.subscriptions.append(subscribtion)
+        self.record_event(...)
+
+    def unsubscribe_from_user(self, subscribed_to: UUID) -> None:
+        if self.account_status == AccountStatuses.INACTIVE:
+            raise UserInactiveError(title=f"User {self.entity_id} is inactive. ")
+
+        if self.entity_id == subscribed_to:
+            raise CannotUnsubscribeFromYourselfError(title=f"User {self.entity_id} cannot unsubscribe from himself. ")
+
+        for subscription in self.subscriptions:
+            if subscription.subscribed_to == subscribed_to:
+                subscription.delete_subscription()
+                self.record_event(...)
+            raise OnlySubscribersCanUnsubscribeError(title=f"Only subscribers can unsubscribe from user {subscribed_to}. ")
+
+        raise SubscriptionNotFoundError(title=f"User {self.entity_id} is not subscribed to user {subscribed_to}. ")
+
+    def remove_user_from_subscribers(self, subscriber_id: UUID) -> None:
+        if self.account_status == AccountStatuses.INACTIVE:
+            raise UserInactiveError(title=f"User {self.entity_id} is inactive. ")
+
+        if self.entity_id == subscriber_id:
+            raise CannotRemoveFromSubscribersYourselfError(title=f"User {self.entity_id} cannot remove himself from subscribers. ")
+
+        for subscriber in self.subscribers:
+            if subscriber.subscriber_id == subscriber_id:
+                subscriber.delete_subscription()
+                self.record_event(...)
+            raise OnlySubscribtionsOwnerCanRemoveSubscriptionsError(
+                title=f"Only subscription owner can remove user {subscriber_id} from subscribers. "
+            )
+
+        raise SubscriptionNotFoundError(title=f"User {subscriber_id} is not subscribed to user {self.entity_id}. ")
+
+    def accept_friendship_request(self, suggested_user_id: UUID) -> None:
+        if self.account_status == AccountStatuses.INACTIVE:
+            raise UserInactiveError(title=f"User {self.entity_id} is inactive. ")
+
+    def regect_friendship_request(self, suggested_user_id: UUID) -> None:
+        if self.account_status == AccountStatuses.INACTIVE:
+            raise UserInactiveError(title=f"User {self.entity_id} is inactive. ")
+
+    def remove_from_friends(self, friend_id: UUID) -> None:
+        if self.account_status == AccountStatuses.INACTIVE:
+            raise UserInactiveError(title=f"User {self.entity_id} is inactive. ")
+
+    def send_friendship_request(self, receiver_id: UUID, friendship_id: UUID) -> None:
+        if self.account_status == AccountStatuses.INACTIVE:
+            raise UserInactiveError(title=f"User {self.entity_id} is inactive. ")
+
+        if self.entity_id == receiver_id:
+            raise CannotSubscibeToYourselfError(title=f"User {self.entity_id} cannot send friendship request to himself. ")
+
+        for friendship in self.friends:
+            if friendship.receiver_user_id == receiver_id:
+                raise CannotAddUserToFriendsTwiceError(title=f"User {self.entity_id} already sent friendship request to user {receiver_id}. ")
+
+        for sended_friendship_request in self.sended_friendship_requests:
+            if sended_friendship_request.receiver_user_id == receiver_id:
+                raise CannotAddUserToFriendsTwiceError(title=f"User {self.entity_id} already sent friendship request to user {receiver_id}. ")
+
+        friendship = Friendship.create_friendship(
+            friendship_id=friendship_id, unit_of_work=self.unit_of_work, suggested_user_id=self.entity_id, receiver_user_id=receiver_id
+        )
+
+        self.friends.append(friendship)
+        self.record_event(...)
 
     def change_account_status(self, account_status: AccountStatuses) -> None:
         if account_status not in list(AccountStatuses):

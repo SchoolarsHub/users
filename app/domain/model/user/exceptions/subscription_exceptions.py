@@ -19,3 +19,19 @@ class BlockedUserCannotSubscribeError(DomainError):
 
 class SubscriptionNotFoundError(DomainError):
     pass
+
+
+class CannotUnsubscribeFromYourselfError(DomainError):
+    pass
+
+
+class CannotRemoveFromSubscribersYourselfError(DomainError):
+    pass
+
+
+class OnlySubscribtionsOwnerCanRemoveSubscriptionsError(DomainError):
+    pass
+
+
+class OnlySubscribersCanUnsubscribeError(DomainError):
+    pass

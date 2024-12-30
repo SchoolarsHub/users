@@ -2,7 +2,7 @@ from abc import abstractmethod
 from typing import Protocol
 from uuid import UUID
 
-from app.domain.models.user.entities.user import User
+from app.domain.model.user.entities.user import User
 
 
 class UserRepository(Protocol):
