@@ -47,7 +47,6 @@ class Avatar(UowedEntity[UUID]):
         unit_of_work: UnitOfWorkTracker,
     ) -> Self:
         avatar = cls(avatar_id, unit_of_work, content, FileData(extension, size), datetime.now(UTC))
-        avatar.mark_new()
         avatar.record_event[AvatarCreated](AvatarCreated(avatar_id, extension, avatar.created_at))
 
         return avatar

@@ -7,5 +7,9 @@ from app.domain.model.avatar.avatar import Avatar
 
 class AvatarRepositry(Protocol):
     @abstractmethod
+    async def add(self, avatar: Avatar) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
     async def with_id(self, avatar_id: UUID) -> Avatar | None:
         raise NotImplementedError

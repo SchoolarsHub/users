@@ -2,12 +2,6 @@ from datetime import UTC, datetime
 from typing import Self
 from uuid import UUID
 
-from app.domain.model.linked_account.events import (
-    ConnectionReasonChanged,
-    LinkedAccountCreated,
-    LinkedAccountDeleted,
-)
-from app.domain.model.linked_account.exceptions import ConnectionLinkNotBelongsToSocialNetworkError
 from app.domain.model.linked_account.social_networks import SocialNetworks
 from app.domain.shared.event import Event
 from app.domain.shared.unit_of_work import UnitOfWorkTracker
@@ -52,24 +46,13 @@ class LinkedAccount(UowedEntity[UUID]):
         connected_for: str | None,
         unit_of_work: UnitOfWorkTracker,
     ) -> Self:
-        if social_network not in connection_link:
-            raise ConnectionLinkNotBelongsToSocialNetworkError(
-                title=f"Connection link: {connection_link} not belongs to social network: {social_network}"
-            )
-
         linked_account = cls(linked_account_id, social_network, connection_link, unit_of_work, datetime.now(UTC), connected_for)
-        linked_account.mark_new()
-        linked_account.record_event[LinkedAccountCreated](
-            LinkedAccountCreated(linked_account_id, social_network, connected_for, linked_account.connected_at)
-        )
 
         return linked_account
 
     def change_connection_reason(self, connected_for: str) -> None:
         self.connected_for = connected_for
         self.mark_dirty()
-        self.record_event[ConnectionReasonChanged](ConnectionReasonChanged(self.linked_account_id, self.connected_for))
 
     def delete_linked_account(self) -> None:
         self.mark_deleted()
-        self.record_event[LinkedAccountDeleted](LinkedAccountDeleted(self.linked_account_id))
