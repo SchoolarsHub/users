@@ -93,7 +93,6 @@ class User(UowedEntity[UUID]):
             raise InactiveUserError(title=f"User with id: {self.user_id} is inactive")
 
         self.fullname = Fullname(firstname, lastname, middlename)
-        self.status = Statuses.INACTIVE
         self.mark_dirty()
         self.record_event[FullnameChanged](FullnameChanged(user_id=self.user_id, firstname=firstname, lastname=lastname, middlename=middlename))
 
@@ -105,7 +104,6 @@ class User(UowedEntity[UUID]):
             raise InactiveUserError(title=f"User with id: {self.user_id} is inactive")
 
         self.contacts = Contacts(email, phone)
-        self.status = Statuses.INACTIVE
         self.mark_dirty()
         self.record_event[ContactsChanged](ContactsChanged(user_id=self.user_id, email=email, phone=phone))
 
