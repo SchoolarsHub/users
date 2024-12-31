@@ -183,4 +183,8 @@ class User(UowedEntity[UUID]):
 
     def delete_user_permanently(self) -> None:
         self.mark_deleted()
+
+        for linked_account in self.linked_accounts:
+            linked_account.delete_linked_account()
+
         self.record_event[UserPermanentlyDeleted](UserPermanentlyDeleted(user_id=self.user_id))
