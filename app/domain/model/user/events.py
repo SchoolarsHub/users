@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import UTC, datetime
 from uuid import UUID
 
 from app.domain.model.user.statuses import Statuses
@@ -40,7 +40,7 @@ class ContactsChanged(Event):
 class UserTemporarilyDeleted(Event):
     user_id: UUID
     status: Statuses = field(default=Statuses.DELETED)
-    deleted_at: datetime = field(default_factory=datetime.now)
+    deleted_at: datetime = field(default=datetime.now(UTC))
 
 
 @dataclass(frozen=True)

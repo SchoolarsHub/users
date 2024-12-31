@@ -60,15 +60,10 @@ class User(UowedEntity[UUID]):
         email: str | None,
         phone: int | None,
         unit_of_work: UnitOfWorkTracker,
-    ) -> None:
-        user = cls(
-            user_id,
-            unit_of_work,
-            Fullname(firstname, lastname, middlename),
-            Contacts(email, phone),
-            Statuses.INACTIVE,
-            datetime.now(UTC),
-        )
+    ) -> Self:
+        contacts = (Contacts(email, phone),)
+        fullname = Fullname(firstname, lastname, middlename)
+        user = cls(user_id, unit_of_work, fullname, contacts, Statuses.INACTIVE, datetime.now(UTC))
         user.mark_new()
         user.record_event[UserCreated](UserCreated(user_id=user_id, firstname=firstname, lastname=lastname, middlename=middlename))
 
