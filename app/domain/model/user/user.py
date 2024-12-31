@@ -117,7 +117,7 @@ class User(UowedEntity[UUID]):
     ) -> Self:
         contacts = Contacts(email, phone)
         fullname = Fullname(firstname, lastname, middlename)
-        user = cls(user_id, unit_of_work, fullname, contacts, Statuses.INACTIVE, datetime.now(UTC))
+        user = cls(user_id, unit_of_work, fullname, contacts, Statuses.INACTIVE, [], datetime.now(UTC))
         user.record_event[UserCreated](UserCreated(user_id=user_id, firstname=firstname, lastname=lastname, middlename=middlename))
 
         return user
