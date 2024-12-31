@@ -4,8 +4,6 @@ from uuid import UUID
 
 from app.domain.model.linked_account.events import ConnectionReasonChanged, LinkedAccountCreated, LinkedAccountDeleted
 from app.domain.model.linked_account.exceptions import (
-    ConnectionLinkNotBelongsToSocialNetworkError,
-    InvalidSocialNetworkError,
     LinkedAccountAlreadyExistsError,
     LinkedAccountNotExistsError,
 )
@@ -67,12 +65,6 @@ class User(UowedEntity[UUID]):
 
         if self.status == Statuses.INACTIVE:
             raise InactiveUserError(title=f"User with id: {self.user_id} is inactive")
-
-        if social_netw not in conn_link:
-            raise ConnectionLinkNotBelongsToSocialNetworkError(title=f"Connection link: {conn_link} not belongs to social network: {social_netw}")
-
-        if social_netw not in list(SocialNetworks):
-            raise InvalidSocialNetworkError(title=f"Social network: {social_netw} is invalid")
 
         for linked_account in self.linked_accounts:
             if linked_account.connection_link == conn_link:

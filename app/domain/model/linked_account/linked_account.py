@@ -2,6 +2,7 @@ from datetime import UTC, datetime
 from typing import Self
 from uuid import UUID
 
+from app.domain.model.linked_account.exceptions import ConnectionLinkNotBelongsToSocialNetworkError, InvalidSocialNetworkError
 from app.domain.model.linked_account.social_networks import SocialNetworks
 from app.domain.shared.event import Event
 from app.domain.shared.unit_of_work import UnitOfWorkTracker
@@ -46,6 +47,14 @@ class LinkedAccount(UowedEntity[UUID]):
         connected_for: str | None,
         unit_of_work: UnitOfWorkTracker,
     ) -> Self:
+        if social_network not in connection_link:
+            raise ConnectionLinkNotBelongsToSocialNetworkError(
+                title=f"Connection link: {connection_link} not belongs to social network: {social_network}"
+            )
+
+        if social_network not in list(SocialNetworks):
+            raise InvalidSocialNetworkError(title=f"Social network: {social_network} is invalid")
+
         linked_account = cls(linked_account_id, social_network, connection_link, unit_of_work, datetime.now(UTC), connected_for)
 
         return linked_account
