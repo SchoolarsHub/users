@@ -13,6 +13,7 @@ class LinkedAccount(UowedEntity[UUID]):
     def __init__(
         self,
         linked_account_id: UUID,
+        user_id: UUID,
         social_network: SocialNetworks,
         connection_link: str,
         unit_of_work: UnitOfWorkTracker,
@@ -26,6 +27,7 @@ class LinkedAccount(UowedEntity[UUID]):
         self.connection_link = connection_link
         self.connected_at = connected_at
         self.connected_for = connected_for
+        self.user_id = user_id
 
         self._events: list[Event] = []
 
@@ -42,6 +44,7 @@ class LinkedAccount(UowedEntity[UUID]):
     def create_linked_account(
         cls: type[Self],
         linked_account_id: UUID,
+        user_id: UUID,
         social_network: SocialNetworks,
         connection_link: str,
         connected_for: str | None,
@@ -55,7 +58,7 @@ class LinkedAccount(UowedEntity[UUID]):
         if social_network not in list(SocialNetworks):
             raise InvalidSocialNetworkError(title=f"Social network: {social_network} is invalid")
 
-        linked_account = cls(linked_account_id, social_network, connection_link, unit_of_work, datetime.now(UTC), connected_for)
+        linked_account = cls(linked_account_id, user_id, social_network, connection_link, unit_of_work, datetime.now(UTC), connected_for)
 
         return linked_account
 

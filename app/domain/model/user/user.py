@@ -70,7 +70,9 @@ class User(UowedEntity[UUID]):
             if linked_account.connection_link == conn_link:
                 raise LinkedAccountAlreadyExistsError(title=f"Linked account with connection link: {conn_link} already exists")
 
-        linked_account = LinkedAccount.create_linked_account(linked_account_id, social_netw, conn_link, connected_for, self.unit_of_work)
+        linked_account = LinkedAccount.create_linked_account(
+            linked_account_id, self.user_id, social_netw, conn_link, connected_for, self.unit_of_work
+        )
         self.linked_accounts.append(linked_account)
         self.record_event[LinkedAccountCreated](LinkedAccountCreated(linked_account_id, social_netw, conn_link, connected_for))
 
