@@ -15,3 +15,11 @@ class UserAlreadyActiveError(DomainError):
 
 class ContactsValidationError(DomainError):
     pass
+
+
+class UserAlreadyExistsError(DomainError):
+    pass
+
+
+class UserNotFoundError(DomainError):
+    pass
