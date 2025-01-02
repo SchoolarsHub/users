@@ -23,8 +23,9 @@ class FakeUserRepository(UserRepository):
 
     async def with_id(self, user_id: UUID) -> User | None:
         user = self.database.users.get(user_id)
-        linked_accounts = self._get_linked_accounts(user_id=user.user_id)
-        user.linked_accounts + linked_accounts
+        if user:
+            linked_accounts = self._get_linked_accounts(user_id=user.user_id)
+            user.linked_accounts = linked_accounts
 
         return user
 
@@ -32,7 +33,7 @@ class FakeUserRepository(UserRepository):
         for user in self.database.users.values():
             if user.contacts.email == email and email is not None:
                 linked_accounts = self._get_linked_accounts(user_id=user.user_id)
-                user.linked_accounts + linked_accounts
+                user.linked_accounts = linked_accounts
 
                 return user
 
@@ -42,7 +43,7 @@ class FakeUserRepository(UserRepository):
         for user in self.database.users.values():
             if user.contacts.phone == phone and phone is not None:
                 linked_accounts = self._get_linked_accounts(user_id=user.user_id)
-                user.linked_accounts + linked_accounts
+                user.linked_accounts = linked_accounts
 
                 return user
 

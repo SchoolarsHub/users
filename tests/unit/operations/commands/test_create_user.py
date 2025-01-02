@@ -9,6 +9,7 @@ from app.domain.model.user.exceptions import ContactsValidationError, UserAlread
 from app.domain.model.user.statuses import Statuses
 from app.domain.model.user.user import User
 from app.domain.model.user.value_objects import Contacts, Fullname
+from tests.mocks.database import FakeDatabase
 from tests.mocks.event_bus import FakeEventBus
 from tests.mocks.unit_of_work import FakeUnitOfWork
 from tests.mocks.user_repository import FakeUserRepository
@@ -45,7 +46,9 @@ async def test_create_user(
 
 @pytest.mark.asyncio
 async def test_create_user_with_not_existing_phone(
-    event_bus: FakeEventBus, unit_of_work: FakeUnitOfWork, user_repository: FakeUserRepository
+    event_bus: FakeEventBus,
+    unit_of_work: FakeUnitOfWork,
+    user_repository: FakeUserRepository,
 ) -> None:
     command_handler = CreateUser(event_bus, user_repository, unit_of_work)
 
@@ -122,7 +125,9 @@ async def test_create_user_with_not_existing_phone_and_email(
 
 
 @pytest.mark.asyncio
-async def test_create_user_with_existing_phone(event_bus: FakeEventBus, unit_of_work: FakeUnitOfWork, user_repository: FakeUserRepository) -> None:
+async def test_create_user_with_existing_phone(
+    event_bus: FakeEventBus, unit_of_work: FakeUnitOfWork, user_repository: FakeUserRepository, database: FakeDatabase
+) -> None:
     command_handler = CreateUser(event_bus, user_repository, unit_of_work)
 
     user = User(
@@ -135,8 +140,7 @@ async def test_create_user_with_existing_phone(event_bus: FakeEventBus, unit_of_
         linked_accounts=[],
         deleted_at=None,
     )
-    await user_repository.add(user)
-    await unit_of_work.commit()
+    database.users[user.user_id] = user
 
     command = CreateUserCommand(
         phone=123456789,
@@ -149,10 +153,13 @@ async def test_create_user_with_existing_phone(event_bus: FakeEventBus, unit_of_
         await command_handler.execute(command=command)
 
     assert len(event_bus.events) == 0
+    assert unit_of_work.committed is False
 
 
 @pytest.mark.asyncio
-async def test_create_user_with_existing_email(event_bus: FakeEventBus, unit_of_work: FakeUnitOfWork, user_repository: FakeUserRepository) -> None:
+async def test_create_user_with_existing_email(
+    event_bus: FakeEventBus, unit_of_work: FakeUnitOfWork, user_repository: FakeUserRepository, database: FakeDatabase
+) -> None:
     command_handler = CreateUser(event_bus, user_repository, unit_of_work)
 
     user = User(
@@ -165,8 +172,7 @@ async def test_create_user_with_existing_email(event_bus: FakeEventBus, unit_of_
         linked_accounts=[],
         deleted_at=None,
     )
-    await user_repository.add(user)
-    await unit_of_work.commit()
+    database.users[user.user_id] = user
 
     command = CreateUserCommand(
         phone=None,
@@ -179,3 +185,4 @@ async def test_create_user_with_existing_email(event_bus: FakeEventBus, unit_of_
         await command_handler.execute(command=command)
 
     assert len(event_bus.events) == 0
+    assert unit_of_work.committed is False

@@ -3,9 +3,9 @@ from uuid import uuid4
 
 import pytest
 
-from app.application.operations.command.delete_user_temporarily import DeleteUserTemporarily
-from app.domain.model.user.events import UserTemporarilyDeleted
-from app.domain.model.user.exceptions import InactiveUserError, UserNotFoundError, UserTemporarilyDeletedError
+from app.application.operations.command.change_fullname import ChangeFullname, ChangeFullnameCommand
+from app.domain.model.user.events import FullnameChanged
+from app.domain.model.user.exceptions import InactiveUserError, UserTemporarilyDeletedError
 from app.domain.model.user.statuses import Statuses
 from app.domain.model.user.user import User
 from app.domain.model.user.value_objects import Contacts, Fullname
@@ -17,14 +17,14 @@ from tests.mocks.user_repository import FakeUserRepository
 
 
 @pytest.mark.asyncio
-async def test_delete_user_temporarily_success(
+async def test_change_fullname_success(
+    event_bus: FakeEventBus,
+    unit_of_work: FakeUnitOfWork,
     user_repository: FakeUserRepository,
     identity_provider: FakeIdentityProvider,
-    unit_of_work: FakeUnitOfWork,
-    event_bus: FakeEventBus,
     database: FakeDatabase,
 ) -> None:
-    command_handler = DeleteUserTemporarily(user_repository, unit_of_work, identity_provider, event_bus)
+    command_handler = ChangeFullname(event_bus, user_repository, unit_of_work, identity_provider)
 
     user = User(
         user_id=uuid4(),
@@ -39,58 +39,36 @@ async def test_delete_user_temporarily_success(
     database.users[user.user_id] = user
     await identity_provider.set_current_user_id(user_id=user.user_id)
 
-    await command_handler.execute()
-    deleted_user = await user_repository.with_id(user.user_id)
+    command = ChangeFullnameCommand(firstname="Kall", lastname="Frix", middlename=None)
 
-    assert deleted_user.status == Statuses.DELETED
-    assert deleted_user.user_id == await identity_provider.get_current_user_id()
-    assert deleted_user.deleted_at is not None
+    await command_handler.execute(command)
+
+    change_fullname_user = await user_repository.with_id(user.user_id)
+
+    assert change_fullname_user is not None
+    assert change_fullname_user.fullname.firstname == command.firstname
+    assert change_fullname_user.fullname.lastname == command.lastname
+    assert change_fullname_user.fullname.middlename == command.middlename
 
     assert len(event_bus.events) == 1
-    assert isinstance(event_bus.events[0], UserTemporarilyDeleted)
+    assert isinstance(event_bus.events[0], FullnameChanged)
     assert event_bus.events[0].user_id == user.user_id
+    assert event_bus.events[0].firstname == command.firstname
+    assert event_bus.events[0].lastname == command.lastname
+    assert event_bus.events[0].middlename == command.middlename
+
     assert unit_of_work.committed is True
 
 
 @pytest.mark.asyncio
-async def test_delete_inactive_user_temporarily(
+async def test_change_fullname_for_temporarily_deleted_user(
+    event_bus: FakeEventBus,
+    unit_of_work: FakeUnitOfWork,
     user_repository: FakeUserRepository,
     identity_provider: FakeIdentityProvider,
-    unit_of_work: FakeUnitOfWork,
-    event_bus: FakeEventBus,
     database: FakeDatabase,
 ) -> None:
-    command_handler = DeleteUserTemporarily(user_repository, unit_of_work, identity_provider, event_bus)
-
-    user = User(
-        user_id=uuid4(),
-        unit_of_work=unit_of_work,
-        contacts=Contacts(phone=123456789, email="123456@gmail.com"),
-        fullname=Fullname(firstname="Jhon", lastname="Doe", middlename="Doe"),
-        status=Statuses.INACTIVE,
-        created_at=datetime.now(UTC),
-        linked_accounts=[],
-        deleted_at=None,
-    )
-    database.users[user.user_id] = user
-    await identity_provider.set_current_user_id(user_id=user.user_id)
-
-    with pytest.raises(InactiveUserError):
-        await command_handler.execute()
-
-    assert len(event_bus.events) == 0
-    assert unit_of_work.committed is False
-
-
-@pytest.mark.asyncio
-async def test_delete_already_deleted_user_temporarily(
-    user_repository: FakeUserRepository,
-    identity_provider: FakeIdentityProvider,
-    unit_of_work: FakeUnitOfWork,
-    event_bus: FakeEventBus,
-    database: FakeDatabase,
-) -> None:
-    command_handler = DeleteUserTemporarily(user_repository, unit_of_work, identity_provider, event_bus)
+    command_handler = ChangeFullname(event_bus, user_repository, unit_of_work, identity_provider)
 
     user = User(
         user_id=uuid4(),
@@ -105,23 +83,42 @@ async def test_delete_already_deleted_user_temporarily(
     database.users[user.user_id] = user
     await identity_provider.set_current_user_id(user_id=user.user_id)
 
+    command = ChangeFullnameCommand(firstname="Kall", lastname="Frix", middlename=None)
+
     with pytest.raises(UserTemporarilyDeletedError):
-        await command_handler.execute()
+        await command_handler.execute(command)
 
     assert len(event_bus.events) == 0
     assert unit_of_work.committed is False
 
 
 @pytest.mark.asyncio
-async def test_delete_user_temporarily_for_not_found_user(
-    user_repository: FakeUserRepository, identity_provider: FakeIdentityProvider, unit_of_work: FakeUnitOfWork, event_bus: FakeEventBus
+async def test_change_fullname_for_inactive_user(
+    event_bus: FakeEventBus,
+    unit_of_work: FakeUnitOfWork,
+    user_repository: FakeUserRepository,
+    identity_provider: FakeIdentityProvider,
+    database: FakeDatabase,
 ) -> None:
-    command_handler = DeleteUserTemporarily(user_repository, unit_of_work, identity_provider, event_bus)
+    command_handler = ChangeFullname(event_bus, user_repository, unit_of_work, identity_provider)
 
-    await identity_provider.set_current_user_id(user_id=uuid4())
+    user = User(
+        user_id=uuid4(),
+        unit_of_work=unit_of_work,
+        contacts=Contacts(phone=123456789, email="123456@gmail.com"),
+        fullname=Fullname(firstname="Jhon", lastname="Doe", middlename="Doe"),
+        status=Statuses.INACTIVE,
+        created_at=datetime.now(UTC),
+        linked_accounts=[],
+        deleted_at=None,
+    )
+    database.users[user.user_id] = user
+    await identity_provider.set_current_user_id(user_id=user.user_id)
 
-    with pytest.raises(UserNotFoundError):
-        await command_handler.execute()
+    command = ChangeFullnameCommand(firstname="Kall", lastname="Frix", middlename=None)
+
+    with pytest.raises(InactiveUserError):
+        await command_handler.execute(command)
 
     assert len(event_bus.events) == 0
     assert unit_of_work.committed is False

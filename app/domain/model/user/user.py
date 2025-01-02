@@ -68,14 +68,14 @@ class User(BaseEntity[UUID]):
             raise InactiveUserError(title=f"User with id: {self.user_id} is inactive")
 
         for linked_account in self.linked_accounts:
-            if linked_account.connection_link == conn_link:
+            if linked_account.social_network == social_netw:
                 raise LinkedAccountAlreadyExistsError(title=f"Linked account with connection link: {conn_link} already exists")
 
         linked_account = LinkedAccount.create_linked_account(
             linked_account_id, self.user_id, social_netw, conn_link, connected_for, self.unit_of_work
         )
         self.linked_accounts.append(linked_account)
-        self.record_event(LinkedAccountCreated(linked_account_id, social_netw, conn_link, connected_for))
+        self.record_event(LinkedAccountCreated(linked_account_id, social_netw, connected_for))
 
     def unlink_social_network(self, linked_account_id: UUID) -> None:
         if self.status == Statuses.DELETED:
@@ -159,15 +159,21 @@ class User(BaseEntity[UUID]):
         if self.status == Statuses.DELETED:
             raise UserTemporarilyDeletedError(title=f"User with id: {self.user_id} already temporarily deleted")
 
+        if self.status == Statuses.INACTIVE:
+            raise InactiveUserError(title=f"User with id: {self.user_id} is inactive")
+
         self.status = Statuses.DELETED
         self.deleted_at = datetime.now(UTC)
         self.record_event(UserTemporarilyDeleted(user_id=self.user_id, deleted_at=self.deleted_at, status=self.status))
 
     def recovery_user(self) -> None:
-        if self.status != Statuses.DELETED:
-            raise UserTemporarilyDeletedError(title=f"User with id: {self.user_id} is not temporarily deleted")
+        if self.status == Statuses.INACTIVE:
+            raise InactiveUserError(title=f"User with id: {self.user_id} is inactive")
 
-        self.status = Statuses.INACTIVE
+        if self.status == Statuses.ACTIVE:
+            raise UserAlreadyActiveError(title=f"User with id: {self.user_id} already have active status")
+
+        self.status = Statuses.ACTIVE
         self.deleted_at = None
         self.record_event(UserRecoveried(user_id=self.user_id, status=self.status))
 
