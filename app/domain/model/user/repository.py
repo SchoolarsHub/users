@@ -11,6 +11,14 @@ class UserRepository(Protocol):
         raise NotImplementedError
 
     @abstractmethod
+    async def update(self, user: User) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def delete(self, user: User) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
     async def with_id(self, user_id: UUID) -> User | None:
         raise NotImplementedError
 

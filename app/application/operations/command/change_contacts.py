@@ -36,5 +36,6 @@ class ChangeContacts:
 
         user.change_contacts(command.email, command.phone)
 
+        await self.repository.update(user)
         await self.event_bus.publish(events=user.raise_events())
         await self.unit_of_work.commit()

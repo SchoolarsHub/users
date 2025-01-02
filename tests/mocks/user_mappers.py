@@ -3,11 +3,11 @@ from typing import Protocol
 
 from app.domain.model.linked_account.linked_account import LinkedAccount
 from app.domain.model.user.user import User
-from app.domain.shared.uowed_entity import UowedEntity
+from app.domain.shared.base_entity import BaseEntity
 from tests.mocks.database import FakeDatabase
 
 
-class GenericDataMapper[EntityT: UowedEntity](Protocol):
+class GenericDataMapper[EntityT: BaseEntity](Protocol):
     @abstractmethod
     async def save(self, entity: EntityT) -> None:
         raise NotImplementedError

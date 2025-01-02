@@ -10,6 +10,8 @@ dependencies = [
     "dishka>=1.4.2",
     "fastapi>=0.115.6",
     "pre-commit>=4.0.1",
+    "pytest-asyncio>=0.25.0",
+    "pytest>=8.3.4",
     "sqlalchemy>=2.0.36",
     "uvicorn>=0.34.0",
 ]

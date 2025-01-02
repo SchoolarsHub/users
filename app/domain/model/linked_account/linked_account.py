@@ -4,12 +4,12 @@ from uuid import UUID
 
 from app.domain.model.linked_account.exceptions import ConnectionLinkNotBelongsToSocialNetworkError, InvalidSocialNetworkError
 from app.domain.model.linked_account.social_networks import SocialNetworks
+from app.domain.shared.base_entity import BaseEntity
 from app.domain.shared.event import Event
 from app.domain.shared.unit_of_work import UnitOfWorkTracker
-from app.domain.shared.uowed_entity import UowedEntity
 
 
-class LinkedAccount(UowedEntity[UUID]):
+class LinkedAccount(BaseEntity[UUID]):
     def __init__(
         self,
         linked_account_id: UUID,
@@ -20,8 +20,9 @@ class LinkedAccount(UowedEntity[UUID]):
         connected_at: datetime,
         connected_for: str | None,
     ) -> None:
-        super().__init__(linked_account_id, unit_of_work)
+        super().__init__(linked_account_id)
 
+        self.unit_of_work = unit_of_work
         self.linked_account_id = linked_account_id
         self.social_network = social_network
         self.connection_link = connection_link
@@ -59,12 +60,13 @@ class LinkedAccount(UowedEntity[UUID]):
             raise InvalidSocialNetworkError(title=f"Social network: {social_network} is invalid")
 
         linked_account = cls(linked_account_id, user_id, social_network, connection_link, unit_of_work, datetime.now(UTC), connected_for)
+        unit_of_work.register_new(linked_account)
 
         return linked_account
 
     def change_connection_reason(self, connected_for: str) -> None:
         self.connected_for = connected_for
-        self.mark_dirty()
+        self.unit_of_work.register_dirty(self)
 
     def delete_linked_account(self) -> None:
-        self.mark_deleted()
+        self.unit_of_work.register_deleted(self)

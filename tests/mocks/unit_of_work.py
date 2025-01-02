@@ -1,23 +1,23 @@
 from app.application.common.unit_of_work import UnitOfWork
-from app.domain.shared.uowed_entity import UowedEntity
+from app.domain.shared.base_entity import BaseEntity
 from tests.mocks.registry import Registry
 
 
 class FakeUnitOfWork(UnitOfWork):
     def __init__(self, registry: Registry) -> None:
-        self.dirty: dict[type[UowedEntity], UowedEntity] = {}
-        self.new: dict[type[UowedEntity], UowedEntity] = {}
-        self.deleted: dict[type[UowedEntity], UowedEntity] = {}
+        self.dirty: dict[type[BaseEntity], BaseEntity] = {}
+        self.new: dict[type[BaseEntity], BaseEntity] = {}
+        self.deleted: dict[type[BaseEntity], BaseEntity] = {}
         self.registry = registry
         self.committed = False
 
-    def register_deleted(self, entity: UowedEntity) -> None:
+    def register_deleted(self, entity: BaseEntity) -> None:
         self.deleted[type(entity)] = entity
 
-    def register_dirty(self, entity: UowedEntity) -> None:
+    def register_dirty(self, entity: BaseEntity) -> None:
         self.dirty[type(entity)] = entity
 
-    def register_new(self, entity: UowedEntity) -> None:
+    def register_new(self, entity: BaseEntity) -> None:
         self.new[type(entity)] = entity
 
     async def commit(self) -> None:

@@ -11,5 +11,13 @@ class AvatarRepositry(Protocol):
         raise NotImplementedError
 
     @abstractmethod
+    async def update(self, avatar: Avatar) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
+    async def delete(self, avatar: Avatar) -> None:
+        raise NotImplementedError
+
+    @abstractmethod
     async def with_id(self, avatar_id: UUID) -> Avatar | None:
         raise NotImplementedError

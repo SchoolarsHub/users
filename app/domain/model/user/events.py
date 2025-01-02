@@ -9,10 +9,10 @@ from app.domain.shared.event import Event
 @dataclass(frozen=True)
 class UserCreated(Event):
     user_id: UUID
-    status: Statuses = field(default=Statuses.INACTIVE)
     firstname: str
     lastname: str
     middlename: str | None
+    status: Statuses = field(default=Statuses.INACTIVE)
 
 
 @dataclass(frozen=True)

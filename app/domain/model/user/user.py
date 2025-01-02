@@ -21,12 +21,12 @@ from app.domain.model.user.events import (
 from app.domain.model.user.exceptions import InactiveUserError, UserAlreadyActiveError, UserTemporarilyDeletedError
 from app.domain.model.user.statuses import Statuses
 from app.domain.model.user.value_objects import Contacts, Fullname
+from app.domain.shared.base_entity import BaseEntity
 from app.domain.shared.event import Event
 from app.domain.shared.unit_of_work import UnitOfWorkTracker
-from app.domain.shared.uowed_entity import UowedEntity
 
 
-class User(UowedEntity[UUID]):
+class User(BaseEntity[UUID]):
     def __init__(
         self,
         user_id: UUID,
@@ -38,8 +38,9 @@ class User(UowedEntity[UUID]):
         created_at: datetime,
         deleted_at: datetime | None = None,
     ) -> None:
-        super().__init__(user_id, unit_of_work)
+        super().__init__(user_id)
 
+        self.unit_of_work = unit_of_work
         self.user_id = user_id
         self.fullname = fullname
         self.contacts = contacts
@@ -74,7 +75,7 @@ class User(UowedEntity[UUID]):
             linked_account_id, self.user_id, social_netw, conn_link, connected_for, self.unit_of_work
         )
         self.linked_accounts.append(linked_account)
-        self.record_event[LinkedAccountCreated](LinkedAccountCreated(linked_account_id, social_netw, conn_link, connected_for))
+        self.record_event(LinkedAccountCreated(linked_account_id, social_netw, conn_link, connected_for))
 
     def unlink_social_network(self, linked_account_id: UUID) -> None:
         if self.status == Statuses.DELETED:
@@ -86,7 +87,7 @@ class User(UowedEntity[UUID]):
         for linked_account in self.linked_accounts:
             if linked_account.linked_account_id == linked_account_id:
                 linked_account.delete_linked_account()
-                self.record_event[LinkedAccountDeleted](LinkedAccountDeleted(linked_account_id))
+                self.record_event(LinkedAccountDeleted(linked_account_id))
                 return
 
         raise LinkedAccountNotExistsError(title=f"Linked account with id: {linked_account_id} not exists")
@@ -101,7 +102,7 @@ class User(UowedEntity[UUID]):
         for linked_account in self.linked_accounts:
             if linked_account.linked_account_id == linked_account_id:
                 linked_account.change_connection_reason(new_reason)
-                self.record_event[ConnectionReasonChanged](ConnectionReasonChanged(linked_account_id, new_reason))
+                self.record_event(ConnectionReasonChanged(linked_account_id, new_reason))
                 return
 
         raise LinkedAccountNotExistsError(title=f"Linked account with id: {linked_account_id} not exists")
@@ -120,7 +121,7 @@ class User(UowedEntity[UUID]):
         contacts = Contacts(email, phone)
         fullname = Fullname(firstname, lastname, middlename)
         user = cls(user_id, unit_of_work, fullname, contacts, Statuses.INACTIVE, [], datetime.now(UTC))
-        user.record_event[UserCreated](UserCreated(user_id=user_id, firstname=firstname, lastname=lastname, middlename=middlename))
+        user.record_event(UserCreated(user_id=user_id, firstname=firstname, lastname=lastname, middlename=middlename))
 
         return user
 
@@ -132,8 +133,7 @@ class User(UowedEntity[UUID]):
             raise UserTemporarilyDeletedError(title=f"User with id: {self.user_id} is temporarily deleted")
 
         self.status = Statuses.ACTIVE
-        self.mark_dirty()
-        self.record_event[UserActivated](UserActivated(user_id=self.user_id, status=self.status))
+        self.record_event(UserActivated(user_id=self.user_id, status=self.status))
 
     def change_fullname(self, firstname: str, lastname: str, middlename: str | None) -> None:
         if self.status == Statuses.DELETED:
@@ -143,8 +143,7 @@ class User(UowedEntity[UUID]):
             raise InactiveUserError(title=f"User with id: {self.user_id} is inactive")
 
         self.fullname = Fullname(firstname, lastname, middlename)
-        self.mark_dirty()
-        self.record_event[FullnameChanged](FullnameChanged(user_id=self.user_id, firstname=firstname, lastname=lastname, middlename=middlename))
+        self.record_event(FullnameChanged(user_id=self.user_id, firstname=firstname, lastname=lastname, middlename=middlename))
 
     def change_contacts(self, email: str | None, phone: int | None) -> None:
         if self.status == Statuses.DELETED:
@@ -154,8 +153,7 @@ class User(UowedEntity[UUID]):
             raise InactiveUserError(title=f"User with id: {self.user_id} is inactive")
 
         self.contacts = Contacts(email, phone)
-        self.mark_dirty()
-        self.record_event[ContactsChanged](ContactsChanged(user_id=self.user_id, email=email, phone=phone))
+        self.record_event(ContactsChanged(user_id=self.user_id, email=email, phone=phone))
 
     def delete_user_temporarily(self) -> None:
         if self.status == Statuses.DELETED:
@@ -163,8 +161,7 @@ class User(UowedEntity[UUID]):
 
         self.status = Statuses.DELETED
         self.deleted_at = datetime.now(UTC)
-        self.mark_dirty()
-        self.record_event[UserTemporarilyDeleted](UserTemporarilyDeleted(user_id=self.user_id, deleted_at=self.deleted_at, status=self.status))
+        self.record_event(UserTemporarilyDeleted(user_id=self.user_id, deleted_at=self.deleted_at, status=self.status))
 
     def recovery_user(self) -> None:
         if self.status != Statuses.DELETED:
@@ -172,13 +169,10 @@ class User(UowedEntity[UUID]):
 
         self.status = Statuses.INACTIVE
         self.deleted_at = None
-        self.mark_dirty()
-        self.record_event[UserRecoveried](UserRecoveried(user_id=self.user_id, status=self.status))
+        self.record_event(UserRecoveried(user_id=self.user_id, status=self.status))
 
     def delete_user_permanently(self) -> None:
-        self.mark_deleted()
-
         for linked_account in self.linked_accounts:
             linked_account.delete_linked_account()
 
-        self.record_event[UserPermanentlyDeleted](UserPermanentlyDeleted(user_id=self.user_id))
+        self.record_event(UserPermanentlyDeleted(user_id=self.user_id))

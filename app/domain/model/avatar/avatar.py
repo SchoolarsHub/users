@@ -5,21 +5,19 @@ from uuid import UUID
 from app.domain.model.avatar.events import AvatarCreated, AvatarDeleted
 from app.domain.model.avatar.extensions import Extensions
 from app.domain.model.avatar.value_objects import FileData
+from app.domain.shared.base_entity import BaseEntity
 from app.domain.shared.event import Event
-from app.domain.shared.unit_of_work import UnitOfWorkTracker
-from app.domain.shared.uowed_entity import UowedEntity
 
 
-class Avatar(UowedEntity[UUID]):
+class Avatar(BaseEntity[UUID]):
     def __init__(
         self,
         avatar_id: UUID,
-        unit_of_work: UnitOfWorkTracker,
         content: bytes,
         file_data: FileData,
         created_at: datetime,
     ) -> None:
-        super().__init__(avatar_id, unit_of_work)
+        super().__init__(avatar_id)
 
         self.avatar_id = avatar_id
         self.content = content
@@ -44,13 +42,11 @@ class Avatar(UowedEntity[UUID]):
         content: bytes,
         size: int,
         extension: Extensions,
-        unit_of_work: UnitOfWorkTracker,
     ) -> Self:
-        avatar = cls(avatar_id, unit_of_work, content, FileData(extension, size), datetime.now(UTC))
+        avatar = cls(avatar_id, content, FileData(extension, size), datetime.now(UTC))
         avatar.record_event[AvatarCreated](AvatarCreated(avatar_id, extension, avatar.created_at))
 
         return avatar
 
     def delete_avatar(self) -> None:
-        self.mark_deleted()
         self.record_event[AvatarDeleted](AvatarDeleted(self.avatar_id))
