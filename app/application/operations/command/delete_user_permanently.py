@@ -22,6 +22,6 @@ class DeleteUserPermanently:
 
         user.delete_user_permanently()
 
-        await self.repository.delete(user)
+        self.repository.delete(user)
         await self.event_bus.publish(events=user.raise_events())
         await self.unit_of_work.commit()

@@ -12,13 +12,13 @@ class FakeUserRepository(UserRepository):
         self.database = database
         self.unit_of_work = unit_of_work
 
-    async def add(self, user: User) -> None:
+    def add(self, user: User) -> None:
         self.unit_of_work.register_new(entity=user)
 
-    async def update(self, user: User) -> None:
+    def update(self, user: User) -> None:
         self.unit_of_work.register_dirty(entity=user)
 
-    async def delete(self, user: User) -> None:
+    def delete(self, user: User) -> None:
         self.unit_of_work.register_deleted(entity=user)
 
     async def with_id(self, user_id: UUID) -> User | None:

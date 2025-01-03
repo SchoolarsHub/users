@@ -1,5 +1,4 @@
 from datetime import UTC, datetime
-from typing import Self
 from uuid import UUID
 
 from app.domain.model.linked_account.events import ConnectionReasonChanged, LinkedAccountCreated, LinkedAccountDeleted
@@ -13,7 +12,6 @@ from app.domain.model.user.events import (
     ContactsChanged,
     FullnameChanged,
     UserActivated,
-    UserCreated,
     UserPermanentlyDeleted,
     UserRecoveried,
     UserTemporarilyDeleted,
@@ -106,24 +104,6 @@ class User(BaseEntity[UUID]):
                 return
 
         raise LinkedAccountNotExistsError(message=f"Linked account with id: {linked_account_id} not exists")
-
-    @classmethod
-    def create_user(
-        cls: type[Self],
-        user_id: UUID,
-        firstname: str,
-        lastname: str,
-        middlename: str | None,
-        email: str | None,
-        phone: int | None,
-        unit_of_work: UnitOfWorkTracker,
-    ) -> Self:
-        contacts = Contacts(email, phone)
-        fullname = Fullname(firstname, lastname, middlename)
-        user = cls(user_id, unit_of_work, fullname, contacts, Statuses.INACTIVE, [], datetime.now(UTC))
-        user.record_event(UserCreated(user_id=user_id, firstname=firstname, lastname=lastname, middlename=middlename))
-
-        return user
 
     def activate_user(self) -> None:
         if self.status == Statuses.ACTIVE:

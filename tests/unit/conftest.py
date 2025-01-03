@@ -1,6 +1,7 @@
 import pytest
 
 from app.domain.model.linked_account.linked_account import LinkedAccount
+from app.domain.model.user.factory import UserFactory
 from app.domain.model.user.user import User
 from tests.mocks.database import FakeDatabase
 from tests.mocks.event_bus import FakeEventBus
@@ -53,3 +54,8 @@ def unit_of_work(registry: Registry) -> FakeUnitOfWork:
 @pytest.fixture
 def user_repository(unit_of_work: FakeUnitOfWork, database: FakeDatabase) -> FakeUserRepository:
     return FakeUserRepository(unit_of_work=unit_of_work, database=database)
+
+
+@pytest.fixture
+def user_factory(user_repository: FakeUserRepository, unit_of_work: FakeUnitOfWork) -> UserFactory:
+    return UserFactory(user_repository, unit_of_work)

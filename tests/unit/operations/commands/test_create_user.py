@@ -6,6 +6,7 @@ import pytest
 from app.application.operations.command.create_user import CreateUser, CreateUserCommand
 from app.domain.model.user.events import UserCreated
 from app.domain.model.user.exceptions import ContactsValidationError, UserAlreadyExistsError
+from app.domain.model.user.factory import UserFactory
 from app.domain.model.user.statuses import Statuses
 from app.domain.model.user.user import User
 from app.domain.model.user.value_objects import Contacts, Fullname
@@ -20,8 +21,9 @@ async def test_create_user(
     event_bus: FakeEventBus,
     unit_of_work: FakeUnitOfWork,
     user_repository: FakeUserRepository,
+    user_factory: UserFactory,
 ) -> None:
-    command_handler = CreateUser(event_bus, user_repository, unit_of_work)
+    command_handler = CreateUser(event_bus, user_repository, unit_of_work, user_factory)
 
     command = CreateUserCommand(
         phone=123456789,
@@ -49,8 +51,9 @@ async def test_create_user_with_not_existing_phone(
     event_bus: FakeEventBus,
     unit_of_work: FakeUnitOfWork,
     user_repository: FakeUserRepository,
+    user_factory: UserFactory,
 ) -> None:
-    command_handler = CreateUser(event_bus, user_repository, unit_of_work)
+    command_handler = CreateUser(event_bus, user_repository, unit_of_work, user_factory)
 
     command = CreateUserCommand(
         phone=None,
@@ -76,9 +79,9 @@ async def test_create_user_with_not_existing_phone(
 
 @pytest.mark.asyncio
 async def test_create_user_with_not_existing_email(
-    event_bus: FakeEventBus, unit_of_work: FakeUnitOfWork, user_repository: FakeUserRepository
+    event_bus: FakeEventBus, unit_of_work: FakeUnitOfWork, user_repository: FakeUserRepository, user_factory: UserFactory
 ) -> None:
-    command_handler = CreateUser(event_bus, user_repository, unit_of_work)
+    command_handler = CreateUser(event_bus, user_repository, unit_of_work, user_factory)
 
     command = CreateUserCommand(
         phone=12,
@@ -104,9 +107,9 @@ async def test_create_user_with_not_existing_email(
 
 @pytest.mark.asyncio
 async def test_create_user_with_not_existing_phone_and_email(
-    event_bus: FakeEventBus, unit_of_work: FakeUnitOfWork, user_repository: FakeUserRepository
+    event_bus: FakeEventBus, unit_of_work: FakeUnitOfWork, user_repository: FakeUserRepository, user_factory: UserFactory
 ) -> None:
-    command_handler = CreateUser(event_bus, user_repository, unit_of_work)
+    command_handler = CreateUser(event_bus, user_repository, unit_of_work, user_factory)
 
     command = CreateUserCommand(
         phone=None,
@@ -126,9 +129,9 @@ async def test_create_user_with_not_existing_phone_and_email(
 
 @pytest.mark.asyncio
 async def test_create_user_with_existing_phone(
-    event_bus: FakeEventBus, unit_of_work: FakeUnitOfWork, user_repository: FakeUserRepository, database: FakeDatabase
+    event_bus: FakeEventBus, unit_of_work: FakeUnitOfWork, user_repository: FakeUserRepository, database: FakeDatabase, user_factory: UserFactory
 ) -> None:
-    command_handler = CreateUser(event_bus, user_repository, unit_of_work)
+    command_handler = CreateUser(event_bus, user_repository, unit_of_work, user_factory)
 
     user = User(
         user_id=uuid4(),
@@ -158,9 +161,9 @@ async def test_create_user_with_existing_phone(
 
 @pytest.mark.asyncio
 async def test_create_user_with_existing_email(
-    event_bus: FakeEventBus, unit_of_work: FakeUnitOfWork, user_repository: FakeUserRepository, database: FakeDatabase
+    event_bus: FakeEventBus, unit_of_work: FakeUnitOfWork, user_repository: FakeUserRepository, database: FakeDatabase, user_factory: UserFactory
 ) -> None:
-    command_handler = CreateUser(event_bus, user_repository, unit_of_work)
+    command_handler = CreateUser(event_bus, user_repository, unit_of_work, user_factory)
 
     user = User(
         user_id=uuid4(),
