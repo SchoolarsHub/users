@@ -145,6 +145,19 @@ wheels = [
 ]
 
 [[package]]
+name = "fast-depends"
+version = "2.4.12"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "anyio" },
+    { name = "pydantic" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/85/f5/8b42b7588a67ad78991e5e7ca0e0c6a1ded535a69a725e4e48d3346a20c1/fast_depends-2.4.12.tar.gz", hash = "sha256:9393e6de827f7afa0141e54fa9553b737396aaf06bd0040e159d1f790487b16d", size = 16682 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/1d/08/4adb160d8394053289fdf3b276e93b53271fd463e54fff8911b23c1db4ed/fast_depends-2.4.12-py3-none-any.whl", hash = "sha256:9e5d110ddc962329e46c9b35e5fe65655984247a13ee3ca5a33186db7d2d75c2", size = 17651 },
+]
+
+[[package]]
 name = "fastapi"
 version = "0.115.6"
 source = { registry = "https://pypi.org/simple" }
@@ -156,6 +169,25 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/93/72/d83b98cd106541e8f5e5bfab8ef2974ab45a62e8a6c5b5e6940f26d2ed4b/fastapi-0.115.6.tar.gz", hash = "sha256:9ec46f7addc14ea472958a96aae5b5de65f39721a46aaf5705c480d9a8b76654", size = 301336 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/52/b3/7e4df40e585df024fac2f80d1a2d579c854ac37109675db2b0cc22c0bb9e/fastapi-0.115.6-py3-none-any.whl", hash = "sha256:e9240b29e36fa8f4bb7290316988e90c381e5092e0cbe84e7818cc3713bcf305", size = 94843 },
+]
+
+[[package]]
+name = "faststream"
+version = "0.5.33"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "anyio" },
+    { name = "fast-depends" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/1a/51/33380ca2877a8b83e94d479b567cf15fe38bb2df0d3cbeb54d07f3b9e694/faststream-0.5.33.tar.gz", hash = "sha256:d40761c9f5db9b2cee69748832c4ead20d61805c439d3fbe3107fe4c9a066b2d", size = 286391 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/64/db/a4aa303e425bf629523a3c706dd67035cac547a92b3c24504e194cafaf42/faststream-0.5.33-py3-none-any.whl", hash = "sha256:24b3b48dff4195c63141864fae24608c4e3e08c9172faccc74b0c46d6d88f665", size = 385102 },
+]
+
+[package.optional-dependencies]
+kafka = [
+    { name = "aiokafka" },
 ]
 
 [[package]]
@@ -513,6 +545,7 @@ dependencies = [
     { name = "asyncpg" },
     { name = "dishka" },
     { name = "fastapi" },
+    { name = "faststream", extra = ["kafka"] },
     { name = "pre-commit" },
     { name = "pytest" },
     { name = "pytest-asyncio" },
@@ -527,6 +560,7 @@ requires-dist = [
     { name = "asyncpg", specifier = ">=0.30.0" },
     { name = "dishka", specifier = ">=1.4.2" },
     { name = "fastapi", specifier = ">=0.115.6" },
+    { name = "faststream", extras = ["kafka"], specifier = ">=0.5.33" },
     { name = "pre-commit", specifier = ">=4.0.1" },
     { name = "pytest", specifier = ">=8.3.4" },
     { name = "pytest-asyncio", specifier = ">=0.25.0" },

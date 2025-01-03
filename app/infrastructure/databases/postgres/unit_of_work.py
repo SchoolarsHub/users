@@ -27,6 +27,7 @@ class UnitOfWorkImpl(UnitOfWork):
     def register_dirty(self, entity: BaseEntity) -> None:
         if entity.entity_id in self.new:
             return
+
         self.dirty[entity.entity_id] = entity
 
     def register_new(self, entity: BaseEntity) -> None:
@@ -34,15 +35,15 @@ class UnitOfWorkImpl(UnitOfWork):
 
     async def commit(self) -> None:
         for entity in self.new.values():
-            mapper = self.registry.get_mapper(type(entity))
+            mapper = await self.registry.get_mapper(type(entity))
             await mapper.save(entity)
 
         for entity in self.dirty.values():
-            mapper = self.registry.get_mapper(type(entity))
+            mapper = await self.registry.get_mapper(type(entity))
             await mapper.update(entity)
 
         for entity in self.deleted.values():
-            mapper = self.registry.get_mapper(type(entity))
+            mapper = await self.registry.get_mapper(type(entity))
             await mapper.delete(entity)
 
         await self.connection.commit()

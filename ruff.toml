@@ -50,7 +50,9 @@ ignore = [
     "ISC001", # Implicitly concatenated string literals on one line
     "COM812", # Explicitly concatenated string should be implicitly concatenated,
     "PLR0913", #Too many arguments in function definition,
-    "PLR2004",  #Magic value used in comparison
+    "PLR2004",  #Magic value used in comparison,
+    "C901",  #is too complex,
+    "PLR0911", #Too many return statements
 ]
 
 [lint.pydocstyle]
