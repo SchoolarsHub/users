@@ -29,7 +29,7 @@ class LinkSocialNetwork:
         user = await self.repository.with_id(current_user_id)
 
         if not user:
-            raise UserNotFoundError(title=f"User with id: {current_user_id} not found")
+            raise UserNotFoundError(message=f"User with id: {current_user_id} not found")
 
         linked_account_id = uuid4()
         user.link_social_network(linked_account_id, command.social_network, command.connection_link, command.connected_for)

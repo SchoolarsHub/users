@@ -25,10 +25,10 @@ class CreateUser:
 
     async def execute(self, command: CreateUserCommand) -> UUID:
         if command.email and await self.repository.with_email(command.email):
-            raise UserAlreadyExistsError(title="User already exists")
+            raise UserAlreadyExistsError(message="User already exists")
 
         if command.phone and await self.repository.with_phone(command.phone):
-            raise UserAlreadyExistsError(title="User already exists")
+            raise UserAlreadyExistsError(message="User already exists")
 
         user = User.create_user(uuid4(), command.firstname, command.lastname, command.middlename, command.email, command.phone, self.unit_of_work)
 

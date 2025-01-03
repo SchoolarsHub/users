@@ -10,7 +10,7 @@ class Contacts:
 
     def __post_init__(self) -> None:
         if self.email is None and self.phone is None:
-            raise ContactsValidationError(title="At least one contact must be provided: email or phone")
+            raise ContactsValidationError(message="At least one contact must be provided: email or phone")
 
 
 @dataclass(frozen=True)

@@ -11,7 +11,7 @@ class FileData:
 
     def __post_init__(self) -> None:
         if self.size > 5 * 1024 * 1024:
-            raise FileDataValidationError("Photo size must be less than 5 MB")
+            raise FileDataValidationError(message="Photo size must be less than 5 MB")
 
         if self.extension not in list(Extensions):
-            raise FileDataValidationError("Invalid photo extension")
+            raise FileDataValidationError(message="Invalid photo extension")

@@ -26,13 +26,13 @@ class ChangeContacts:
         user = await self.repository.with_id(current_user_id)
 
         if not user:
-            raise UserNotFoundError(title=f"User with id: {current_user_id} not found")
+            raise UserNotFoundError(message=f"User with id: {current_user_id} not found")
 
         if command.email and await self.repository.with_email(command.email):
-            raise UserAlreadyExistsError(title="User already exists")
+            raise UserAlreadyExistsError(message="User already exists")
 
         if command.phone and await self.repository.with_phone(command.phone):
-            raise UserAlreadyExistsError(title="User already exists")
+            raise UserAlreadyExistsError(message="User already exists")
 
         user.change_contacts(command.email, command.phone)
 

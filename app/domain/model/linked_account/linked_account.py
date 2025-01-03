@@ -32,7 +32,7 @@ class LinkedAccount(BaseEntity[UUID]):
 
         self._events: list[Event] = []
 
-    def record_event[TEvent: Event](self, event: TEvent) -> None:
+    def record_event(self, event: Event) -> None:
         self.events.append(event)
 
     def raise_events(self) -> list[Event]:
@@ -53,11 +53,11 @@ class LinkedAccount(BaseEntity[UUID]):
     ) -> Self:
         if social_network not in connection_link:
             raise ConnectionLinkNotBelongsToSocialNetworkError(
-                title=f"Connection link: {connection_link} not belongs to social network: {social_network}"
+                message=f"Connection link: {connection_link} not belongs to social network: {social_network}"
             )
 
         if social_network not in list(SocialNetworks):
-            raise InvalidSocialNetworkError(title=f"Social network: {social_network} is invalid")
+            raise InvalidSocialNetworkError(message=f"Social network: {social_network} is invalid")
 
         linked_account = cls(linked_account_id, user_id, social_network, connection_link, unit_of_work, datetime.now(UTC), connected_for)
         unit_of_work.register_new(linked_account)

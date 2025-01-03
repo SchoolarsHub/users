@@ -18,7 +18,7 @@ class DeleteUserPermanently:
         user = await self.repository.with_id(current_user_id)
 
         if not user:
-            raise UserNotFoundError(title=f"User with id: {current_user_id} not found")
+            raise UserNotFoundError(message=f"User with id: {current_user_id} not found")
 
         user.delete_user_permanently()
 

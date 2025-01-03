@@ -26,7 +26,7 @@ class Avatar(BaseEntity[UUID]):
 
         self._events: list[Event] = []
 
-    def record_event[TEvent: Event](self, event: TEvent) -> None:
+    def record_event(self, event: Event) -> None:
         self._events.append(event)
 
     def raise_events(self) -> list[Event]:
@@ -44,9 +44,9 @@ class Avatar(BaseEntity[UUID]):
         extension: Extensions,
     ) -> Self:
         avatar = cls(avatar_id, content, FileData(extension, size), datetime.now(UTC))
-        avatar.record_event[AvatarCreated](AvatarCreated(avatar_id, extension, avatar.created_at))
+        avatar.record_event(AvatarCreated(avatar_id, extension, avatar.created_at))
 
         return avatar
 
     def delete_avatar(self) -> None:
-        self.record_event[AvatarDeleted](AvatarDeleted(self.avatar_id))
+        self.record_event(AvatarDeleted(self.avatar_id))
