@@ -33,17 +33,19 @@ class UnitOfWorkImpl(UnitOfWork):
     def register_new(self, entity: BaseEntity) -> None:
         self.new[entity.entity_id] = entity
 
-    async def commit(self) -> None:
+    async def flush(self) -> None:
         for entity in self.new.values():
-            mapper = await self.registry.get_mapper(type(entity))
+            mapper = self.registry.get_mapper(self.connection, entity=type(entity))
             await mapper.save(entity)
 
         for entity in self.dirty.values():
-            mapper = await self.registry.get_mapper(type(entity))
+            mapper = self.registry.get_mapper(self.connection, entity=type(entity))
             await mapper.update(entity)
 
         for entity in self.deleted.values():
-            mapper = await self.registry.get_mapper(type(entity))
+            mapper = self.registry.get_mapper(self.connection, entity=type(entity))
             await mapper.delete(entity)
 
+    async def commit(self) -> None:
+        await self.flush()
         await self.connection.commit()
