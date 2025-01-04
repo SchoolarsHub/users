@@ -14,7 +14,6 @@ from app.domain.model.user.user import User
 from app.domain.model.user.value_objects import Contacts, Fullname
 from tests.mocks.database import FakeDatabase
 from tests.mocks.event_bus import FakeEventBus
-from tests.mocks.identity_provider import FakeIdentityProvider
 from tests.mocks.unit_of_work import FakeUnitOfWork
 from tests.mocks.user_repository import FakeUserRepository
 
@@ -22,13 +21,12 @@ from tests.mocks.user_repository import FakeUserRepository
 @pytest.mark.asyncio
 async def test_link_social_network(
     user_repository: FakeUserRepository,
-    identity_provider: FakeIdentityProvider,
     unit_of_work: FakeUnitOfWork,
     event_bus: FakeEventBus,
     database: FakeDatabase,
 ) -> None:
     user_id = uuid4()
-    command_handler = LinkSocialNetwork(event_bus, user_repository, unit_of_work, identity_provider)
+    command_handler = LinkSocialNetwork(event_bus, user_repository, unit_of_work)
 
     user = User(
         user_id=user_id,
@@ -42,9 +40,9 @@ async def test_link_social_network(
     )
     database.users[user.user_id] = user
 
-    await identity_provider.set_current_user_id(user_id=user.user_id)
-
-    command = LinkSocialNetworkCommand(social_network=SocialNetworks.TELEGRAM, connection_link="telegram.com", connected_for="busines")
+    command = LinkSocialNetworkCommand(
+        user_id=user_id, social_network=SocialNetworks.TELEGRAM, connection_link="telegram.com", connected_for="busines"
+    )
 
     linked_account_id = await command_handler.execute(command)
     user_with_linked_account = await user_repository.with_id(user.user_id)
@@ -71,13 +69,12 @@ async def test_link_social_network(
 @pytest.mark.asyncio
 async def test_link_social_network_for_inactive_user(
     user_repository: FakeUserRepository,
-    identity_provider: FakeIdentityProvider,
     unit_of_work: FakeUnitOfWork,
     event_bus: FakeEventBus,
     database: FakeDatabase,
 ) -> None:
     user_id = uuid4()
-    command_handler = LinkSocialNetwork(event_bus, user_repository, unit_of_work, identity_provider)
+    command_handler = LinkSocialNetwork(event_bus, user_repository, unit_of_work)
 
     user = User(
         user_id=user_id,
@@ -91,9 +88,9 @@ async def test_link_social_network_for_inactive_user(
     )
     database.users[user.user_id] = user
 
-    await identity_provider.set_current_user_id(user_id=user.user_id)
-
-    command = LinkSocialNetworkCommand(social_network=SocialNetworks.TELEGRAM, connection_link="telegram.com", connected_for="busines")
+    command = LinkSocialNetworkCommand(
+        user_id=user_id, social_network=SocialNetworks.TELEGRAM, connection_link="telegram.com", connected_for="busines"
+    )
 
     with pytest.raises(InactiveUserError):
         await command_handler.execute(command)
@@ -105,13 +102,12 @@ async def test_link_social_network_for_inactive_user(
 @pytest.mark.asyncio
 async def test_link_social_network_for_deleted_user(
     user_repository: FakeUserRepository,
-    identity_provider: FakeIdentityProvider,
     unit_of_work: FakeUnitOfWork,
     event_bus: FakeEventBus,
     database: FakeDatabase,
 ) -> None:
     user_id = uuid4()
-    command_handler = LinkSocialNetwork(event_bus, user_repository, unit_of_work, identity_provider)
+    command_handler = LinkSocialNetwork(event_bus, user_repository, unit_of_work)
 
     user = User(
         user_id=user_id,
@@ -125,9 +121,9 @@ async def test_link_social_network_for_deleted_user(
     )
     database.users[user.user_id] = user
 
-    await identity_provider.set_current_user_id(user_id=user.user_id)
-
-    command = LinkSocialNetworkCommand(social_network=SocialNetworks.TELEGRAM, connection_link="telegram.com", connected_for="busines")
+    command = LinkSocialNetworkCommand(
+        user_id=user_id, social_network=SocialNetworks.TELEGRAM, connection_link="telegram.com", connected_for="busines"
+    )
 
     with pytest.raises(UserTemporarilyDeletedError):
         await command_handler.execute(command)
@@ -139,13 +135,12 @@ async def test_link_social_network_for_deleted_user(
 @pytest.mark.asyncio
 async def test_link_social_network_with_invalid_connection_link(
     user_repository: FakeUserRepository,
-    identity_provider: FakeIdentityProvider,
     unit_of_work: FakeUnitOfWork,
     event_bus: FakeEventBus,
     database: FakeDatabase,
 ) -> None:
     user_id = uuid4()
-    command_handler = LinkSocialNetwork(event_bus, user_repository, unit_of_work, identity_provider)
+    command_handler = LinkSocialNetwork(event_bus, user_repository, unit_of_work)
 
     user = User(
         user_id=user_id,
@@ -159,9 +154,9 @@ async def test_link_social_network_with_invalid_connection_link(
     )
     database.users[user.user_id] = user
 
-    await identity_provider.set_current_user_id(user_id=user.user_id)
-
-    command = LinkSocialNetworkCommand(social_network=SocialNetworks.TELEGRAM, connection_link="twitter.com", connected_for="busines")
+    command = LinkSocialNetworkCommand(
+        user_id=user_id, social_network=SocialNetworks.TELEGRAM, connection_link="twitter.com", connected_for="busines"
+    )
 
     with pytest.raises(ConnectionLinkNotBelongsToSocialNetworkError):
         await command_handler.execute(command)
@@ -173,13 +168,12 @@ async def test_link_social_network_with_invalid_connection_link(
 @pytest.mark.asyncio
 async def test_link_social_network_to_user_with_already_exists_linked_account(
     user_repository: FakeUserRepository,
-    identity_provider: FakeIdentityProvider,
     unit_of_work: FakeUnitOfWork,
     event_bus: FakeEventBus,
     database: FakeDatabase,
 ) -> None:
     user_id = uuid4()
-    command_handler = LinkSocialNetwork(event_bus, user_repository, unit_of_work, identity_provider)
+    command_handler = LinkSocialNetwork(event_bus, user_repository, unit_of_work)
 
     user = User(
         user_id=user_id,
@@ -203,9 +197,9 @@ async def test_link_social_network_to_user_with_already_exists_linked_account(
     database.linked_accounts[linked_account.linked_account_id] = linked_account
     database.users[user.user_id] = user
 
-    await identity_provider.set_current_user_id(user_id=user.user_id)
-
-    command = LinkSocialNetworkCommand(social_network=SocialNetworks.TELEGRAM, connection_link="telegram.com", connected_for="busines")
+    command = LinkSocialNetworkCommand(
+        user_id=user_id, social_network=SocialNetworks.TELEGRAM, connection_link="telegram.com", connected_for="busines"
+    )
 
     with pytest.raises(LinkedAccountAlreadyExistsError):
         await command_handler.execute(command)

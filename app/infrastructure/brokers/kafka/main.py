@@ -6,4 +6,4 @@ from app.infrastructure.brokers.kafka.config import KafkaConfig
 
 
 def setup_kafka_broker(config: KafkaConfig, security: SASLPlaintext) -> KafkaBroker:
-    return Broker(bootstrap_servers=config.bootstrap_servers, security=security)
+    return Broker(bootstrap_servers=config.kafka_url, security=security)

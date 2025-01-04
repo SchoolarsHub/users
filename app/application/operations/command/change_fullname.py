@@ -1,29 +1,31 @@
 from dataclasses import dataclass
+from uuid import UUID
 
 from app.application.common.event_bus import EventBus
-from app.application.common.identity_provider import IdentityProvider
 from app.application.common.unit_of_work import UnitOfWork
+from app.domain.model.user.exceptions import UserNotFoundError
 from app.domain.model.user.repository import UserRepository
 
 
 @dataclass(frozen=True)
 class ChangeFullnameCommand:
+    user_id: UUID
     firstname: str
     lastname: str
     middlename: str | None
 
 
 class ChangeFullname:
-    def __init__(self, event_bus: EventBus, repository: UserRepository, unit_of_work: UnitOfWork, identity_provider: IdentityProvider) -> None:
+    def __init__(self, event_bus: EventBus, repository: UserRepository, unit_of_work: UnitOfWork) -> None:
         self.event_bus = event_bus
         self.repository = repository
         self.unit_of_work = unit_of_work
-        self.identity_provider = identity_provider
 
     async def execute(self, command: ChangeFullnameCommand) -> None:
-        current_user_id = await self.identity_provider.get_current_user_id()
+        user = await self.repository.with_id(command.user_id)
 
-        user = await self.repository.with_id(current_user_id)
+        if not user:
+            raise UserNotFoundError(message="User not found")
 
         user.change_fullname(command.firstname, command.lastname, command.middlename)
 

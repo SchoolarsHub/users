@@ -11,7 +11,6 @@ from app.domain.model.user.user import User
 from app.domain.model.user.value_objects import Contacts, Fullname
 from tests.mocks.database import FakeDatabase
 from tests.mocks.event_bus import FakeEventBus
-from tests.mocks.identity_provider import FakeIdentityProvider
 from tests.mocks.unit_of_work import FakeUnitOfWork
 from tests.mocks.user_repository import FakeUserRepository
 
@@ -21,10 +20,9 @@ async def test_change_fullname_success(
     event_bus: FakeEventBus,
     unit_of_work: FakeUnitOfWork,
     user_repository: FakeUserRepository,
-    identity_provider: FakeIdentityProvider,
     database: FakeDatabase,
 ) -> None:
-    command_handler = ChangeFullname(event_bus, user_repository, unit_of_work, identity_provider)
+    command_handler = ChangeFullname(event_bus, user_repository, unit_of_work)
 
     user = User(
         user_id=uuid4(),
@@ -37,9 +35,8 @@ async def test_change_fullname_success(
         deleted_at=None,
     )
     database.users[user.user_id] = user
-    await identity_provider.set_current_user_id(user_id=user.user_id)
 
-    command = ChangeFullnameCommand(firstname="Kall", lastname="Frix", middlename=None)
+    command = ChangeFullnameCommand(user_id=user.user_id, firstname="Kall", lastname="Frix", middlename=None)
 
     await command_handler.execute(command)
 
@@ -65,10 +62,9 @@ async def test_change_fullname_for_temporarily_deleted_user(
     event_bus: FakeEventBus,
     unit_of_work: FakeUnitOfWork,
     user_repository: FakeUserRepository,
-    identity_provider: FakeIdentityProvider,
     database: FakeDatabase,
 ) -> None:
-    command_handler = ChangeFullname(event_bus, user_repository, unit_of_work, identity_provider)
+    command_handler = ChangeFullname(event_bus, user_repository, unit_of_work)
 
     user = User(
         user_id=uuid4(),
@@ -81,9 +77,8 @@ async def test_change_fullname_for_temporarily_deleted_user(
         deleted_at=None,
     )
     database.users[user.user_id] = user
-    await identity_provider.set_current_user_id(user_id=user.user_id)
 
-    command = ChangeFullnameCommand(firstname="Kall", lastname="Frix", middlename=None)
+    command = ChangeFullnameCommand(user_id=user.user_id, firstname="Kall", lastname="Frix", middlename=None)
 
     with pytest.raises(UserTemporarilyDeletedError):
         await command_handler.execute(command)
@@ -97,10 +92,9 @@ async def test_change_fullname_for_inactive_user(
     event_bus: FakeEventBus,
     unit_of_work: FakeUnitOfWork,
     user_repository: FakeUserRepository,
-    identity_provider: FakeIdentityProvider,
     database: FakeDatabase,
 ) -> None:
-    command_handler = ChangeFullname(event_bus, user_repository, unit_of_work, identity_provider)
+    command_handler = ChangeFullname(event_bus, user_repository, unit_of_work)
 
     user = User(
         user_id=uuid4(),
@@ -113,9 +107,8 @@ async def test_change_fullname_for_inactive_user(
         deleted_at=None,
     )
     database.users[user.user_id] = user
-    await identity_provider.set_current_user_id(user_id=user.user_id)
 
-    command = ChangeFullnameCommand(firstname="Kall", lastname="Frix", middlename=None)
+    command = ChangeFullnameCommand(user_id=user.user_id, firstname="Kall", lastname="Frix", middlename=None)
 
     with pytest.raises(InactiveUserError):
         await command_handler.execute(command)

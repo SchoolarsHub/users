@@ -6,7 +6,7 @@ from app.domain.model.user.statuses import Statuses
 from app.infrastructure.event_bus.integration_events.integration_event import IntegrationEvent
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class UserCreatedIntegration(IntegrationEvent):
     user_id: UUID
     firstname: str
@@ -16,31 +16,31 @@ class UserCreatedIntegration(IntegrationEvent):
     status: Statuses = field(default=Statuses.INACTIVE)
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class UserActivatedIntegration(IntegrationEvent):
     user_id: UUID
     event_name: str = field(default="UserActivated")
     status: Statuses = field(default=Statuses.ACTIVE)
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class FullnameChangedIntegration(IntegrationEvent):
     user_id: UUID
     firstname: str
     lastname: str
-    event_name = field(default="FullnameChanged")
     middlename: str | None
+    event_name: str = field(default="FullnameChanged")
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class ContactsChangedIntegration(IntegrationEvent):
     user_id: UUID
     email: str | None
     phone: int | None
-    event_name = field(default="ContactsChanged")
+    event_name: str = field(default="ContactsChanged")
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class UserTemporarilyDeletedIntegration(IntegrationEvent):
     user_id: UUID
     event_name: str = field(default="UserTemporarilyDeleted")
@@ -48,14 +48,14 @@ class UserTemporarilyDeletedIntegration(IntegrationEvent):
     deleted_at: datetime = field(default=datetime.now(UTC))
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class UserRecoveriedIntegration(IntegrationEvent):
     user_id: UUID
     event_name: str = field(default="UserRecoveried")
     status: Statuses = field(default=Statuses.INACTIVE)
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class UserPermanentlyDeletedIntegration(IntegrationEvent):
     user_id: UUID
     event_name: str = field(default="UserPermanentlyDeleted")

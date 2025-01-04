@@ -11,10 +11,10 @@ from app.application.operations.command.change_social_network_connection_reason 
     ChangeSocialNetworkConnectionReasonCommand,
 )
 from app.application.operations.command.create_user import CreateUser, CreateUserCommand
-from app.application.operations.command.delete_user_permanently import DeleteUserPermanently
-from app.application.operations.command.delete_user_temporarily import DeleteUserTemporarily
+from app.application.operations.command.delete_user_permanently import DeleteUserPermanently, DeleteUserPermanentlyCommand
+from app.application.operations.command.delete_user_temporarily import DeleteUserTemporarily, DeleteUserTemporarilyCommand
 from app.application.operations.command.link_social_network import LinkSocialNetwork, LinkSocialNetworkCommand
-from app.application.operations.command.recovery_user import RecoveryUser
+from app.application.operations.command.recovery_user import RecoveryUser, RecoveryUserCommand
 from app.application.operations.command.unlink_social_network import UnlinkSocialNetwork, UnlinkSocialNetworkCommand
 from app.domain.model.linked_account.exceptions import (
     ConnectionLinkNotBelongsToSocialNetworkError,
@@ -22,7 +22,13 @@ from app.domain.model.linked_account.exceptions import (
     LinkedAccountAlreadyExistsError,
     LinkedAccountNotExistsError,
 )
-from app.domain.model.user.exceptions import InactiveUserError, UserAlreadyActiveError, UserAlreadyExistsError, UserTemporarilyDeletedError
+from app.domain.model.user.exceptions import (
+    InactiveUserError,
+    UserAlreadyActiveError,
+    UserAlreadyExistsError,
+    UserNotFoundError,
+    UserTemporarilyDeletedError,
+)
 from app.presentation.api.shemas.responses import ErrorResponse, SuccessResponse
 
 router = APIRouter(prefix="/users", tags=["Users"])
@@ -48,7 +54,7 @@ async def create_user(command: CreateUserCommand, handler: FromDishka[CreateUser
     return SuccessResponse(status=status.HTTP_201_CREATED, result=result)
 
 
-@router.post(
+@router.put(
     "/recovery-user",
     responses={
         status.HTTP_200_OK: {
@@ -63,12 +69,16 @@ async def create_user(command: CreateUserCommand, handler: FromDishka[CreateUser
             "model": ErrorResponse[UserAlreadyActiveError],
             "description": "User already active",
         },
+        status.HTTP_404_NOT_FOUND: {
+            "model": ErrorResponse[UserNotFoundError],
+            "description": "User not found",
+        },
     },
     status_code=status.HTTP_200_OK,
 )
 @inject
-async def recovery_user(handler: FromDishka[RecoveryUser]) -> SuccessResponse:
-    await handler.execute()
+async def recovery_user(command: RecoveryUserCommand, handler: FromDishka[RecoveryUser]) -> SuccessResponse:
+    await handler.execute(command=command)
     return SuccessResponse(status=status.HTTP_200_OK)
 
 
@@ -79,12 +89,16 @@ async def recovery_user(handler: FromDishka[RecoveryUser]) -> SuccessResponse:
             "model": SuccessResponse,
             "description": "User deleted successfully",
         },
+        status.HTTP_404_NOT_FOUND: {
+            "model": ErrorResponse[UserNotFoundError],
+            "description": "User not found",
+        },
     },
     status_code=status.HTTP_200_OK,
 )
 @inject
-async def delete_user_permanently(handler: FromDishka[DeleteUserPermanently]) -> SuccessResponse:
-    await handler.execute()
+async def delete_user_permanently(command: DeleteUserPermanentlyCommand, handler: FromDishka[DeleteUserPermanently]) -> SuccessResponse:
+    await handler.execute(command=command)
     return SuccessResponse(status=status.HTTP_200_OK)
 
 
@@ -103,12 +117,16 @@ async def delete_user_permanently(handler: FromDishka[DeleteUserPermanently]) ->
             "model": ErrorResponse[UserTemporarilyDeletedError],
             "description": "User already temporarily deleted",
         },
+        status.HTTP_404_NOT_FOUND: {
+            "model": ErrorResponse[UserNotFoundError],
+            "description": "User not found",
+        },
     },
     status_code=status.HTTP_200_OK,
 )
 @inject
-async def delete_user_temporarily(handler: FromDishka[DeleteUserTemporarily]) -> SuccessResponse:
-    await handler.execute()
+async def delete_user_temporarily(command: DeleteUserTemporarilyCommand, handler: FromDishka[DeleteUserTemporarily]) -> SuccessResponse:
+    await handler.execute(command=command)
     return SuccessResponse(status=status.HTTP_200_OK)
 
 
@@ -126,6 +144,10 @@ async def delete_user_temporarily(handler: FromDishka[DeleteUserTemporarily]) ->
         status.HTTP_400_BAD_REQUEST: {
             "model": ErrorResponse[UserTemporarilyDeletedError],
             "description": "User is temporarily deleted",
+        },
+        status.HTTP_404_NOT_FOUND: {
+            "model": ErrorResponse[UserNotFoundError],
+            "description": "User not found",
         },
     },
     status_code=status.HTTP_200_OK,
@@ -154,6 +176,10 @@ async def change_fullname(command: ChangeFullnameCommand, handler: FromDishka[Ch
         status.HTTP_409_CONFLICT: {
             "model": ErrorResponse[UserAlreadyExistsError],
             "description": "User already exists",
+        },
+        status.HTTP_404_NOT_FOUND: {
+            "model": ErrorResponse[UserNotFoundError],
+            "description": "User not found",
         },
     },
     status_code=status.HTTP_200_OK,
@@ -191,6 +217,10 @@ async def change_contacts(command: ChangeContactsCommand, handler: FromDishka[Ch
             "model": ErrorResponse[ConnectionLinkNotBelongsToSocialNetworkError],
             "description": "Connection link not belongs to social network",
         },
+        status.HTTP_404_NOT_FOUND: {
+            "model": ErrorResponse[UserNotFoundError],
+            "description": "User not found",
+        },
     },
     status_code=status.HTTP_201_CREATED,
 )
@@ -219,6 +249,10 @@ async def link_social_network(command: LinkSocialNetworkCommand, handler: FromDi
             "model": ErrorResponse[LinkedAccountNotExistsError],
             "description": "Linked account not exists",
         },
+        status.HTTP_404_NOT_FOUND: {
+            "model": ErrorResponse[UserNotFoundError],
+            "description": "User not found",
+        },
     },
     status_code=status.HTTP_200_OK,
 )
@@ -246,6 +280,10 @@ async def unlink_social_network(command: UnlinkSocialNetworkCommand, handler: Fr
         status.HTTP_404_NOT_FOUND: {
             "model": ErrorResponse[LinkedAccountNotExistsError],
             "description": "Linked account not exists",
+        },
+        status.HTTP_404_NOT_FOUND: {
+            "model": ErrorResponse[UserNotFoundError],
+            "description": "User not found",
         },
     },
     status_code=status.HTTP_200_OK,

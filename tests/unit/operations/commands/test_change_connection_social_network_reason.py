@@ -17,7 +17,6 @@ from app.domain.model.user.user import User
 from app.domain.model.user.value_objects import Contacts, Fullname
 from tests.mocks.database import FakeDatabase
 from tests.mocks.event_bus import FakeEventBus
-from tests.mocks.identity_provider import FakeIdentityProvider
 from tests.mocks.unit_of_work import FakeUnitOfWork
 from tests.mocks.user_repository import FakeUserRepository
 
@@ -25,13 +24,12 @@ from tests.mocks.user_repository import FakeUserRepository
 @pytest.mark.asyncio
 async def test_change_social_network_connection_reason_success(
     user_repository: FakeUserRepository,
-    identity_provider: FakeIdentityProvider,
     unit_of_work: FakeUnitOfWork,
     event_bus: FakeEventBus,
     database: FakeDatabase,
 ) -> None:
     user_id = uuid4()
-    command_handler = ChangeSocialNetworkConnectionReason(user_repository, event_bus, unit_of_work, identity_provider)
+    command_handler = ChangeSocialNetworkConnectionReason(user_repository, event_bus, unit_of_work)
 
     user = User(
         user_id=user_id,
@@ -55,9 +53,7 @@ async def test_change_social_network_connection_reason_success(
     database.linked_accounts[linked_account.linked_account_id] = linked_account
     database.users[user.user_id] = user
 
-    await identity_provider.set_current_user_id(user_id=user.user_id)
-
-    command = ChangeSocialNetworkConnectionReasonCommand(linked_account_id=linked_account.linked_account_id, reason="busines")
+    command = ChangeSocialNetworkConnectionReasonCommand(user_id=user_id, linked_account_id=linked_account.linked_account_id, reason="busines")
 
     await command_handler.execute(command)
     user_with_changed_linked_account = await user_repository.with_id(user.user_id)
@@ -80,13 +76,12 @@ async def test_change_social_network_connection_reason_success(
 @pytest.mark.asyncio
 async def test_change_social_network_connection_reason_with_inactive_user(
     user_repository: FakeUserRepository,
-    identity_provider: FakeIdentityProvider,
     unit_of_work: FakeUnitOfWork,
     event_bus: FakeEventBus,
     database: FakeDatabase,
 ) -> None:
     user_id = uuid4()
-    command_handler = ChangeSocialNetworkConnectionReason(user_repository, event_bus, unit_of_work, identity_provider)
+    command_handler = ChangeSocialNetworkConnectionReason(user_repository, event_bus, unit_of_work)
 
     user = User(
         user_id=user_id,
@@ -110,9 +105,7 @@ async def test_change_social_network_connection_reason_with_inactive_user(
     database.linked_accounts[linked_account.linked_account_id] = linked_account
     database.users[user.user_id] = user
 
-    await identity_provider.set_current_user_id(user_id=user.user_id)
-
-    command = ChangeSocialNetworkConnectionReasonCommand(linked_account_id=linked_account.linked_account_id, reason="busines")
+    command = ChangeSocialNetworkConnectionReasonCommand(user_id=user_id, linked_account_id=linked_account.linked_account_id, reason="busines")
 
     with pytest.raises(InactiveUserError):
         await command_handler.execute(command)
@@ -124,13 +117,12 @@ async def test_change_social_network_connection_reason_with_inactive_user(
 @pytest.mark.asyncio
 async def test_change_social_network_connection_reason_with_deleted_user(
     user_repository: FakeUserRepository,
-    identity_provider: FakeIdentityProvider,
     unit_of_work: FakeUnitOfWork,
     event_bus: FakeEventBus,
     database: FakeDatabase,
 ) -> None:
     user_id = uuid4()
-    command_handler = ChangeSocialNetworkConnectionReason(user_repository, event_bus, unit_of_work, identity_provider)
+    command_handler = ChangeSocialNetworkConnectionReason(user_repository, event_bus, unit_of_work)
 
     user = User(
         user_id=user_id,
@@ -154,9 +146,7 @@ async def test_change_social_network_connection_reason_with_deleted_user(
     database.linked_accounts[linked_account.linked_account_id] = linked_account
     database.users[user.user_id] = user
 
-    await identity_provider.set_current_user_id(user_id=user.user_id)
-
-    command = ChangeSocialNetworkConnectionReasonCommand(linked_account_id=linked_account.linked_account_id, reason="busines")
+    command = ChangeSocialNetworkConnectionReasonCommand(user_id=user_id, linked_account_id=linked_account.linked_account_id, reason="busines")
 
     with pytest.raises(UserTemporarilyDeletedError):
         await command_handler.execute(command)
@@ -168,13 +158,12 @@ async def test_change_social_network_connection_reason_with_deleted_user(
 @pytest.mark.asyncio
 async def test_change_social_network_connection_reason_with_not_found_linked_account(
     user_repository: FakeUserRepository,
-    identity_provider: FakeIdentityProvider,
     unit_of_work: FakeUnitOfWork,
     event_bus: FakeEventBus,
     database: FakeDatabase,
 ) -> None:
     user_id = uuid4()
-    command_handler = ChangeSocialNetworkConnectionReason(user_repository, event_bus, unit_of_work, identity_provider)
+    command_handler = ChangeSocialNetworkConnectionReason(user_repository, event_bus, unit_of_work)
 
     user = User(
         user_id=user_id,
@@ -198,9 +187,7 @@ async def test_change_social_network_connection_reason_with_not_found_linked_acc
     database.linked_accounts[linked_account.linked_account_id] = linked_account
     database.users[user.user_id] = user
 
-    await identity_provider.set_current_user_id(user_id=user_id)
-
-    command = ChangeSocialNetworkConnectionReasonCommand(linked_account_id=uuid4(), reason="busines")
+    command = ChangeSocialNetworkConnectionReasonCommand(user_id=user_id, linked_account_id=uuid4(), reason="busines")
 
     with pytest.raises(LinkedAccountNotExistsError):
         await command_handler.execute(command)

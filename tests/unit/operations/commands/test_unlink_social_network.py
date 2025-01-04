@@ -14,7 +14,6 @@ from app.domain.model.user.user import User
 from app.domain.model.user.value_objects import Contacts, Fullname
 from tests.mocks.database import FakeDatabase
 from tests.mocks.event_bus import FakeEventBus
-from tests.mocks.identity_provider import FakeIdentityProvider
 from tests.mocks.unit_of_work import FakeUnitOfWork
 from tests.mocks.user_repository import FakeUserRepository
 
@@ -22,13 +21,12 @@ from tests.mocks.user_repository import FakeUserRepository
 @pytest.mark.asyncio
 async def test_unlink_social_network_success(
     user_repository: FakeUserRepository,
-    identity_provider: FakeIdentityProvider,
     unit_of_work: FakeUnitOfWork,
     event_bus: FakeEventBus,
     database: FakeDatabase,
 ) -> None:
     user_id = uuid4()
-    command_handler = UnlinkSocialNetwork(event_bus, user_repository, unit_of_work, identity_provider)
+    command_handler = UnlinkSocialNetwork(event_bus, user_repository, unit_of_work)
 
     user = User(
         user_id=user_id,
@@ -52,9 +50,8 @@ async def test_unlink_social_network_success(
     database.linked_accounts[linked_account.linked_account_id] = linked_account
     database.users[user.user_id] = user
 
-    await identity_provider.set_current_user_id(user_id=user.user_id)
-
     command = UnlinkSocialNetworkCommand(
+        user_id=user_id,
         linked_account_id=linked_account.linked_account_id,
     )
 
@@ -73,13 +70,12 @@ async def test_unlink_social_network_success(
 @pytest.mark.asyncio
 async def test_unlink_social_network_for_inactive_user(
     user_repository: FakeUserRepository,
-    identity_provider: FakeIdentityProvider,
     unit_of_work: FakeUnitOfWork,
     event_bus: FakeEventBus,
     database: FakeDatabase,
 ) -> None:
     user_id = uuid4()
-    command_handler = UnlinkSocialNetwork(event_bus, user_repository, unit_of_work, identity_provider)
+    command_handler = UnlinkSocialNetwork(event_bus, user_repository, unit_of_work)
 
     user = User(
         user_id=user_id,
@@ -103,9 +99,8 @@ async def test_unlink_social_network_for_inactive_user(
     database.linked_accounts[linked_account.linked_account_id] = linked_account
     database.users[user.user_id] = user
 
-    await identity_provider.set_current_user_id(user_id=user.user_id)
-
     command = UnlinkSocialNetworkCommand(
+        user_id=user_id,
         linked_account_id=linked_account.linked_account_id,
     )
 
@@ -122,13 +117,12 @@ async def test_unlink_social_network_for_inactive_user(
 @pytest.mark.asyncio
 async def test_unlink_social_network_for_deleted_user(
     user_repository: FakeUserRepository,
-    identity_provider: FakeIdentityProvider,
     unit_of_work: FakeUnitOfWork,
     event_bus: FakeEventBus,
     database: FakeDatabase,
 ) -> None:
     user_id = uuid4()
-    command_handler = UnlinkSocialNetwork(event_bus, user_repository, unit_of_work, identity_provider)
+    command_handler = UnlinkSocialNetwork(event_bus, user_repository, unit_of_work)
 
     user = User(
         user_id=user_id,
@@ -152,9 +146,8 @@ async def test_unlink_social_network_for_deleted_user(
     database.linked_accounts[linked_account.linked_account_id] = linked_account
     database.users[user.user_id] = user
 
-    await identity_provider.set_current_user_id(user_id=user.user_id)
-
     command = UnlinkSocialNetworkCommand(
+        user_id=user_id,
         linked_account_id=linked_account.linked_account_id,
     )
 
@@ -171,13 +164,12 @@ async def test_unlink_social_network_for_deleted_user(
 @pytest.mark.asyncio
 async def test_unlink_not_exists_social_network(
     user_repository: FakeUserRepository,
-    identity_provider: FakeIdentityProvider,
     unit_of_work: FakeUnitOfWork,
     event_bus: FakeEventBus,
     database: FakeDatabase,
 ) -> None:
     user_id = uuid4()
-    command_handler = UnlinkSocialNetwork(event_bus, user_repository, unit_of_work, identity_provider)
+    command_handler = UnlinkSocialNetwork(event_bus, user_repository, unit_of_work)
 
     user = User(
         user_id=user_id,
@@ -201,9 +193,7 @@ async def test_unlink_not_exists_social_network(
     database.linked_accounts[linked_account.linked_account_id] = linked_account
     database.users[user.user_id] = user
 
-    await identity_provider.set_current_user_id(user_id=user.user_id)
-
-    command = UnlinkSocialNetworkCommand(linked_account_id=uuid4())
+    command = UnlinkSocialNetworkCommand(user_id=user_id, linked_account_id=uuid4())
 
     with pytest.raises(LinkedAccountNotExistsError):
         await command_handler.execute(command)

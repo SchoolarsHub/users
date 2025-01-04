@@ -9,7 +9,13 @@ from app.domain.model.linked_account.exceptions import (
     LinkedAccountAlreadyExistsError,
     LinkedAccountNotExistsError,
 )
-from app.domain.model.user.exceptions import InactiveUserError, UserAlreadyActiveError, UserAlreadyExistsError, UserTemporarilyDeletedError
+from app.domain.model.user.exceptions import (
+    InactiveUserError,
+    UserAlreadyActiveError,
+    UserAlreadyExistsError,
+    UserNotFoundError,
+    UserTemporarilyDeletedError,
+)
 from app.presentation.api.exc_handlers import domain_error_handler
 from app.presentation.api.middlewares.cors_middleware import setup_cors_middleware
 from app.presentation.api.routers import healthcheck, user
@@ -55,5 +61,9 @@ def setup_exc_handlers(app: FastAPI) -> None:
     )
     app.add_exception_handler(
         LinkedAccountNotExistsError,
+        partial(domain_error_handler, status_code=status.HTTP_404_NOT_FOUND),
+    )
+    app.add_exception_handler(
+        UserNotFoundError,
         partial(domain_error_handler, status_code=status.HTTP_404_NOT_FOUND),
     )

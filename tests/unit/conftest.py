@@ -5,7 +5,6 @@ from app.domain.model.user.factory import UserFactory
 from app.domain.model.user.user import User
 from tests.mocks.database import FakeDatabase
 from tests.mocks.event_bus import FakeEventBus
-from tests.mocks.identity_provider import FakeIdentityProvider
 from tests.mocks.registry import Registry
 from tests.mocks.unit_of_work import FakeUnitOfWork
 from tests.mocks.user_mappers import GenericDataMapper, LinkedAccountDataMapper, UserDataMapper
@@ -20,11 +19,6 @@ def event_bus() -> FakeEventBus:
 @pytest.fixture
 def database() -> FakeDatabase:
     return FakeDatabase()
-
-
-@pytest.fixture
-def identity_provider() -> FakeIdentityProvider:
-    return FakeIdentityProvider()
 
 
 @pytest.fixture

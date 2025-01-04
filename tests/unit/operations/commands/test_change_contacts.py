@@ -11,7 +11,6 @@ from app.domain.model.user.user import User
 from app.domain.model.user.value_objects import Contacts, Fullname
 from tests.mocks.database import FakeDatabase
 from tests.mocks.event_bus import FakeEventBus
-from tests.mocks.identity_provider import FakeIdentityProvider
 from tests.mocks.unit_of_work import FakeUnitOfWork
 from tests.mocks.user_repository import FakeUserRepository
 
@@ -21,10 +20,9 @@ async def test_change_contacts_success(
     event_bus: FakeEventBus,
     unit_of_work: FakeUnitOfWork,
     user_repository: FakeUserRepository,
-    identity_provider: FakeIdentityProvider,
     database: FakeDatabase,
 ) -> None:
-    command_handler = ChangeContacts(event_bus, user_repository, unit_of_work, identity_provider)
+    command_handler = ChangeContacts(event_bus, user_repository, unit_of_work)
 
     user = User(
         user_id=uuid4(),
@@ -38,9 +36,7 @@ async def test_change_contacts_success(
     )
     database.users[user.user_id] = user
 
-    await identity_provider.set_current_user_id(user_id=user.user_id)
-
-    command = ChangeContactsCommand(email=None, phone=123)
+    command = ChangeContactsCommand(user_id=user.user_id, email=None, phone=123)
 
     await command_handler.execute(command)
 
@@ -64,10 +60,9 @@ async def test_change_contacts_for_existing_emil(
     event_bus: FakeEventBus,
     unit_of_work: FakeUnitOfWork,
     user_repository: FakeUserRepository,
-    identity_provider: FakeIdentityProvider,
     database: FakeDatabase,
 ) -> None:
-    command_handler = ChangeContacts(event_bus, user_repository, unit_of_work, identity_provider)
+    command_handler = ChangeContacts(event_bus, user_repository, unit_of_work)
 
     user = User(
         user_id=uuid4(),
@@ -80,9 +75,8 @@ async def test_change_contacts_for_existing_emil(
         deleted_at=None,
     )
     database.users[user.user_id] = user
-    await identity_provider.set_current_user_id(user_id=user.user_id)
 
-    command = ChangeContactsCommand(email=user.contacts.email, phone=123)
+    command = ChangeContactsCommand(user_id=user.user_id, email=user.contacts.email, phone=123)
 
     with pytest.raises(UserAlreadyExistsError):
         await command_handler.execute(command)
@@ -96,10 +90,9 @@ async def test_change_contacts_for_existing_phone(
     event_bus: FakeEventBus,
     unit_of_work: FakeUnitOfWork,
     user_repository: FakeUserRepository,
-    identity_provider: FakeIdentityProvider,
     database: FakeDatabase,
 ) -> None:
-    command_handler = ChangeContacts(event_bus, user_repository, unit_of_work, identity_provider)
+    command_handler = ChangeContacts(event_bus, user_repository, unit_of_work)
 
     user = User(
         user_id=uuid4(),
@@ -112,9 +105,8 @@ async def test_change_contacts_for_existing_phone(
         deleted_at=None,
     )
     database.users[user.user_id] = user
-    await identity_provider.set_current_user_id(user_id=user.user_id)
 
-    command = ChangeContactsCommand(email=None, phone=user.contacts.phone)
+    command = ChangeContactsCommand(user_id=user.user_id, email=None, phone=user.contacts.phone)
 
     with pytest.raises(UserAlreadyExistsError):
         await command_handler.execute(command)
@@ -128,10 +120,9 @@ async def test_change_contacts_for_inactive_user(
     event_bus: FakeEventBus,
     unit_of_work: FakeUnitOfWork,
     user_repository: FakeUserRepository,
-    identity_provider: FakeIdentityProvider,
     database: FakeDatabase,
 ) -> None:
-    command_handler = ChangeContacts(event_bus, user_repository, unit_of_work, identity_provider)
+    command_handler = ChangeContacts(event_bus, user_repository, unit_of_work)
 
     user = User(
         user_id=uuid4(),
@@ -144,9 +135,8 @@ async def test_change_contacts_for_inactive_user(
         deleted_at=None,
     )
     database.users[user.user_id] = user
-    await identity_provider.set_current_user_id(user_id=user.user_id)
 
-    command = ChangeContactsCommand(email=None, phone=1)
+    command = ChangeContactsCommand(user_id=user.user_id, email=None, phone=1)
 
     with pytest.raises(InactiveUserError):
         await command_handler.execute(command)
@@ -160,10 +150,9 @@ async def test_change_contacts_for_temporarily_deleted_user(
     event_bus: FakeEventBus,
     unit_of_work: FakeUnitOfWork,
     user_repository: FakeUserRepository,
-    identity_provider: FakeIdentityProvider,
     database: FakeDatabase,
 ) -> None:
-    command_handler = ChangeContacts(event_bus, user_repository, unit_of_work, identity_provider)
+    command_handler = ChangeContacts(event_bus, user_repository, unit_of_work)
 
     user = User(
         user_id=uuid4(),
@@ -176,9 +165,8 @@ async def test_change_contacts_for_temporarily_deleted_user(
         deleted_at=None,
     )
     database.users[user.user_id] = user
-    await identity_provider.set_current_user_id(user_id=user.user_id)
 
-    command = ChangeContactsCommand(email=None, phone=1234)
+    command = ChangeContactsCommand(user_id=user.user_id, email=None, phone=1234)
 
     with pytest.raises(UserTemporarilyDeletedError):
         await command_handler.execute(command)
