@@ -1,6 +1,6 @@
 from ssl import SSLContext
 
-from dishka import AnyOf, Provider, Scope
+from dishka import AnyOf, AsyncContainer, Provider, Scope, make_async_container
 from faststream.kafka.annotations import KafkaBroker
 from faststream.security import SASLPlaintext
 from sqlalchemy.ext.asyncio import AsyncConnection, AsyncEngine
@@ -26,10 +26,30 @@ from app.infrastructure.brokers.kafka.security import setup_kafka_security, setu
 from app.infrastructure.brokers.publisher import MessagePublisher
 from app.infrastructure.databases.postgres.gateways.user_finder import UserFinder
 from app.infrastructure.databases.postgres.gateways.user_repository import UserRepositoryImpl
-from app.infrastructure.databases.postgres.main import setup_sqla_connection, setup_sqla_engine
+from app.infrastructure.databases.postgres.main import setup_datamappers, setup_sqla_connection, setup_sqla_engine
 from app.infrastructure.databases.postgres.registry import Registry
 from app.infrastructure.databases.postgres.unit_of_work import UnitOfWorkImpl
 from app.infrastructure.event_bus.event_bus import EventBusImpl
+
+
+def setup_async_container() -> AsyncContainer:
+    registry = Registry()
+    provider = Provider()
+
+    setup_datamappers(registry=registry)
+    setup_provider(provider=provider)
+
+    return make_async_container(provider, context={Registry: registry})
+
+
+def setup_provider(provider: Provider) -> None:
+    provide_command_handlers(provider=provider)
+    provide_query_handlers(provider=provider)
+    provide_broker(provider=provider)
+    provide_event_bus(provider=provider)
+    provide_db(provider=provider)
+    provide_db_uow(provider=provider)
+    provide_db_factories(provider=provider)
 
 
 def provide_command_handlers(provider: Provider) -> None:
@@ -48,28 +68,28 @@ def provide_query_handlers(provider: Provider) -> None:
     provider.provide(GetUserById, scope=Scope.REQUEST)
 
 
-def setup_broker(provider: Provider) -> None:
+def provide_broker(provider: Provider) -> None:
     provider.provide(setup_kafka_broker, scope=Scope.APP, provides=KafkaBroker)
     provider.provide(setup_kafka_security, scope=Scope.APP, provides=SASLPlaintext)
     provider.provide(setup_ssl_context, scope=Scope.APP, provides=SSLContext)
 
 
-def setup_event_bus(provider: Provider) -> None:
+def provide_event_bus(provider: Provider) -> None:
     provider.provide(EventBusImpl, scope=Scope.REQUEST, provides=EventBus)
     provider.provide(MessagePublisherImpl, scope=Scope.REQUEST, provides=MessagePublisher)
 
 
-def setup_db(provider: Provider) -> None:
+def provide_db(provider: Provider) -> None:
     provider.provide(setup_sqla_engine, scope=Scope.APP, provides=AsyncEngine)
     provider.provide(setup_sqla_connection, scope=Scope.REQUEST, provides=AsyncConnection)
 
 
-def setup_db_uow(provider: Provider) -> None:
+def provide_db_uow(provider: Provider) -> None:
     provider.from_context(Registry, scope=Scope.REQUEST, provides=Registry)
     provider.provide(UnitOfWorkImpl, scope=Scope.REQUEST, provides=AnyOf[UnitOfWork, UnitOfWorkTracker])
 
 
-def setup_db_factories(provider: Provider) -> None:
+def provide_db_factories(provider: Provider) -> None:
     provider.provide(UserRepositoryImpl, scope=Scope.REQUEST, provides=UserRepository)
     provider.provide(UserFactory, scope=Scope.REQUEST, provides=UserFactory)
     provider.provide(UserFinder, scope=Scope.REQUEST, provides=UserFinder)
