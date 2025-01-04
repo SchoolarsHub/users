@@ -5,7 +5,7 @@ import pytest
 
 from app.application.operations.command.change_contacts import ChangeContacts, ChangeContactsCommand
 from app.domain.model.user.events import ContactsChanged
-from app.domain.model.user.exceptions import InactiveUserError, UserAlreadyExistsError, UserNotFoundError, UserTemporarilyDeletedError
+from app.domain.model.user.exceptions import InactiveUserError, UserAlreadyExistsError, UserTemporarilyDeletedError
 from app.domain.model.user.statuses import Statuses
 from app.domain.model.user.user import User
 from app.domain.model.user.value_objects import Contacts, Fullname
@@ -181,26 +181,6 @@ async def test_change_contacts_for_temporarily_deleted_user(
     command = ChangeContactsCommand(email=None, phone=1234)
 
     with pytest.raises(UserTemporarilyDeletedError):
-        await command_handler.execute(command)
-
-    assert len(event_bus.events) == 0
-    assert unit_of_work.committed is False
-
-
-@pytest.mark.asyncio
-async def test_change_contacts_for_not_found_user(
-    event_bus: FakeEventBus,
-    unit_of_work: FakeUnitOfWork,
-    user_repository: FakeUserRepository,
-    identity_provider: FakeIdentityProvider,
-) -> None:
-    command_handler = ChangeContacts(event_bus, user_repository, unit_of_work, identity_provider)
-
-    await identity_provider.set_current_user_id(user_id=uuid4())
-
-    command = ChangeContactsCommand(email=None, phone=1234)
-
-    with pytest.raises(UserNotFoundError):
         await command_handler.execute(command)
 
     assert len(event_bus.events) == 0

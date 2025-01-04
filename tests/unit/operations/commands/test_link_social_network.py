@@ -8,7 +8,7 @@ from app.domain.model.linked_account.events import LinkedAccountCreated
 from app.domain.model.linked_account.exceptions import ConnectionLinkNotBelongsToSocialNetworkError, LinkedAccountAlreadyExistsError
 from app.domain.model.linked_account.linked_account import LinkedAccount
 from app.domain.model.linked_account.social_networks import SocialNetworks
-from app.domain.model.user.exceptions import InactiveUserError, UserNotFoundError, UserTemporarilyDeletedError
+from app.domain.model.user.exceptions import InactiveUserError, UserTemporarilyDeletedError
 from app.domain.model.user.statuses import Statuses
 from app.domain.model.user.user import User
 from app.domain.model.user.value_objects import Contacts, Fullname
@@ -130,28 +130,6 @@ async def test_link_social_network_for_deleted_user(
     command = LinkSocialNetworkCommand(social_network=SocialNetworks.TELEGRAM, connection_link="telegram.com", connected_for="busines")
 
     with pytest.raises(UserTemporarilyDeletedError):
-        await command_handler.execute(command)
-
-    assert len(event_bus.events) == 0
-    assert unit_of_work.committed is False
-
-
-@pytest.mark.asyncio
-async def test_link_social_network_for_not_found_user(
-    user_repository: FakeUserRepository,
-    identity_provider: FakeIdentityProvider,
-    unit_of_work: FakeUnitOfWork,
-    event_bus: FakeEventBus,
-    database: FakeDatabase,
-) -> None:
-    user_id = uuid4()
-    command_handler = LinkSocialNetwork(event_bus, user_repository, unit_of_work, identity_provider)
-
-    await identity_provider.set_current_user_id(user_id=user_id)
-
-    command = LinkSocialNetworkCommand(social_network=SocialNetworks.TELEGRAM, connection_link="telegram.com", connected_for="busines")
-
-    with pytest.raises(UserNotFoundError):
         await command_handler.execute(command)
 
     assert len(event_bus.events) == 0

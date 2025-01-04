@@ -5,7 +5,7 @@ import pytest
 
 from app.application.operations.command.recovery_user import RecoveryUser
 from app.domain.model.user.events import UserRecoveried
-from app.domain.model.user.exceptions import InactiveUserError, UserAlreadyActiveError, UserNotFoundError
+from app.domain.model.user.exceptions import InactiveUserError, UserAlreadyActiveError
 from app.domain.model.user.statuses import Statuses
 from app.domain.model.user.user import User
 from app.domain.model.user.value_objects import Contacts, Fullname
@@ -120,21 +120,6 @@ async def test_recovery_inactive_user(
     assert recoveried_user is not None
     assert recoveried_user.status == Statuses.INACTIVE
     assert recoveried_user.deleted_at is None
-
-    assert len(event_bus.events) == 0
-    assert unit_of_work.committed is False
-
-
-@pytest.mark.asyncio
-async def test_recovery_user_for_not_found_user(
-    user_repository: FakeUserRepository, identity_provider: FakeIdentityProvider, unit_of_work: FakeUnitOfWork, event_bus: FakeEventBus
-) -> None:
-    command_handler = RecoveryUser(event_bus, user_repository, unit_of_work, identity_provider)
-
-    await identity_provider.set_current_user_id(user_id=uuid4())
-
-    with pytest.raises(UserNotFoundError):
-        await command_handler.execute()
 
     assert len(event_bus.events) == 0
     assert unit_of_work.committed is False

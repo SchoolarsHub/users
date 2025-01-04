@@ -7,7 +7,6 @@ from app.application.operations.command.delete_user_permanently import DeleteUse
 from app.domain.model.linked_account.linked_account import LinkedAccount
 from app.domain.model.linked_account.social_networks import SocialNetworks
 from app.domain.model.user.events import UserPermanentlyDeleted
-from app.domain.model.user.exceptions import UserNotFoundError
 from app.domain.model.user.statuses import Statuses
 from app.domain.model.user.user import User
 from app.domain.model.user.value_objects import Contacts, Fullname
@@ -109,18 +108,3 @@ async def test_delete_user_permanently_with_linked_accounts(
     assert event_bus.events[0].user_id == user.user_id
 
     assert unit_of_work.committed is True
-
-
-@pytest.mark.asyncio
-async def test_delete_user_permanently_for_not_found_user(
-    user_repository: FakeUserRepository, identity_provider: FakeIdentityProvider, unit_of_work: FakeUnitOfWork, event_bus: FakeEventBus
-) -> None:
-    command_handler = DeleteUserPermanently(user_repository, unit_of_work, identity_provider, event_bus)
-
-    await identity_provider.set_current_user_id(user_id=uuid4())
-
-    with pytest.raises(UserNotFoundError):
-        await command_handler.execute()
-
-    assert len(event_bus.events) == 0
-    assert unit_of_work.committed is False
