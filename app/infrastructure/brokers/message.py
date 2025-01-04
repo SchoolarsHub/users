@@ -1,4 +1,4 @@
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from uuid import UUID, uuid4
 
 
@@ -8,7 +8,4 @@ class Message:
     data: dict[str, str] | None = field(default=None)
 
     def as_dict(self) -> dict[str, str]:
-        return {
-            "message_id": self.message_id,
-            "data": self.data,
-        }
+        return asdict(self)

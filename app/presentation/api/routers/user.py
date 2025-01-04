@@ -23,6 +23,7 @@ from app.domain.model.linked_account.exceptions import (
     LinkedAccountNotExistsError,
 )
 from app.domain.model.user.exceptions import (
+    ContactsValidationError,
     InactiveUserError,
     UserAlreadyActiveError,
     UserAlreadyExistsError,
@@ -44,6 +45,10 @@ router = APIRouter(prefix="/users", tags=["Users"])
         status.HTTP_409_CONFLICT: {
             "model": ErrorResponse[UserAlreadyExistsError],
             "description": "User already exists",
+        },
+        status.HTTP_422_UNPROCESSABLE_ENTITY: {
+            "model": ErrorResponse[ContactsValidationError],
+            "description": "Invalid contacts",
         },
     },
     status_code=status.HTTP_201_CREATED,
@@ -180,6 +185,10 @@ async def change_fullname(command: ChangeFullnameCommand, handler: FromDishka[Ch
         status.HTTP_404_NOT_FOUND: {
             "model": ErrorResponse[UserNotFoundError],
             "description": "User not found",
+        },
+        status.HTTP_422_UNPROCESSABLE_ENTITY: {
+            "model": ErrorResponse[ContactsValidationError],
+            "description": "Invalid contacts",
         },
     },
     status_code=status.HTTP_200_OK,

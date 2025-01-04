@@ -10,6 +10,7 @@ from app.domain.model.linked_account.exceptions import (
     LinkedAccountNotExistsError,
 )
 from app.domain.model.user.exceptions import (
+    ContactsValidationError,
     InactiveUserError,
     UserAlreadyActiveError,
     UserAlreadyExistsError,
@@ -66,4 +67,8 @@ def setup_exc_handlers(app: FastAPI) -> None:
     app.add_exception_handler(
         UserNotFoundError,
         partial(domain_error_handler, status_code=status.HTTP_404_NOT_FOUND),
+    )
+    app.add_exception_handler(
+        ContactsValidationError,
+        partial(domain_error_handler, status_code=status.HTTP_422_UNPROCESSABLE_ENTITY),
     )

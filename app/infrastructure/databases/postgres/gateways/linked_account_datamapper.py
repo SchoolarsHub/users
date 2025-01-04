@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncConnection
 
 from app.domain.model.linked_account.linked_account import LinkedAccount
 from app.infrastructure.databases.postgres.gateways.generic_datamapper import GenericDataMapper
+from app.infrastructure.databases.postgres.tables import linked_account_table
 
 
 class LinkedAccountDataMapper(GenericDataMapper[LinkedAccount]):
@@ -10,7 +11,7 @@ class LinkedAccountDataMapper(GenericDataMapper[LinkedAccount]):
         self.connection = connection
 
     async def save(self, entity: LinkedAccount) -> None:
-        stmt = insert(LinkedAccount).values(
+        stmt = insert(linked_account_table).values(
             linked_account_id=entity.linked_account_id,
             user_id=entity.user_id,
             social_network=entity.social_network,
@@ -23,8 +24,8 @@ class LinkedAccountDataMapper(GenericDataMapper[LinkedAccount]):
 
     async def update(self, entity: LinkedAccount) -> None:
         stmt = (
-            update(LinkedAccount)
-            .where(LinkedAccount.linked_account_id == entity.linked_account_id)
+            update(linked_account_table)
+            .where(linked_account_table.c.linked_account_id == entity.linked_account_id)
             .values(
                 social_network=entity.social_network,
                 connection_link=entity.connection_link,
@@ -36,6 +37,6 @@ class LinkedAccountDataMapper(GenericDataMapper[LinkedAccount]):
         await self.connection.execute(stmt)
 
     async def delete(self, entity: LinkedAccount) -> None:
-        stmt = delete(LinkedAccount).where(LinkedAccount.linked_account_id == entity.linked_account_id)
+        stmt = delete(linked_account_table).where(linked_account_table.c.linked_account_id == entity.linked_account_id)
 
         await self.connection.execute(stmt)

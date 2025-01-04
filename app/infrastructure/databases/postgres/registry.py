@@ -8,7 +8,7 @@ class Registry:
     def __init__(self) -> None:
         self.mappers: dict[type[BaseEntity], type[GenericDataMapper[BaseEntity]]] = {}
 
-    def get_mapper[TEntity: BaseEntity](self, entity: type[TEntity], *args: Any, **kwargs: Any) -> GenericDataMapper[TEntity]:
+    def get_mapper[TEntity: BaseEntity](self, *args: Any, entity: type[TEntity], **kwargs: Any) -> GenericDataMapper[TEntity]:
         requested_mapper = self.mappers.get(entity)
         return self._override_mapper(*args, mapper=requested_mapper, **kwargs)
 
@@ -16,7 +16,7 @@ class Registry:
         self.mappers[entity] = mapper
 
     def _override_mapper[TEntity: BaseEntity](
-        self, mapper: type[GenericDataMapper[TEntity]], *args: Any, **kwargs: Any
+        self, *args: Any, mapper: type[GenericDataMapper[TEntity]], **kwargs: Any
     ) -> GenericDataMapper[TEntity]:
         overrided_mapper = mapper(*args, **kwargs)
         return overrided_mapper

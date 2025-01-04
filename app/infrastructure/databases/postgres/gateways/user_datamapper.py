@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncConnection
 
 from app.domain.model.user.user import User
 from app.infrastructure.databases.postgres.gateways.generic_datamapper import GenericDataMapper
+from app.infrastructure.databases.postgres.tables import user_table
 
 
 class UserDataMapper(GenericDataMapper[User]):
@@ -10,7 +11,7 @@ class UserDataMapper(GenericDataMapper[User]):
         self.connection = connection
 
     async def save(self, entity: User) -> None:
-        stmt = insert(User).values(
+        stmt = insert(user_table).values(
             user_id=entity.user_id,
             firstname=entity.fullname.firstname,
             lastname=entity.fullname.lastname,
@@ -26,8 +27,8 @@ class UserDataMapper(GenericDataMapper[User]):
 
     async def update(self, entity: User) -> None:
         stmt = (
-            update(User)
-            .where(User.user_id == entity.user_id)
+            update(user_table)
+            .where(user_table.c.user_id == entity.user_id)
             .values(
                 firstname=entity.fullname.firstname,
                 lastname=entity.fullname.lastname,
@@ -43,6 +44,6 @@ class UserDataMapper(GenericDataMapper[User]):
         await self.connection.execute(stmt)
 
     async def delete(self, entity: User) -> None:
-        stmt = delete(User).where(User.user_id == entity.user_id)
+        stmt = delete(user_table).where(user_table.c.user_id == entity.user_id)
 
         await self.connection.execute(stmt)
