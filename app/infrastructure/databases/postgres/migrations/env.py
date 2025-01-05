@@ -4,7 +4,6 @@ from alembic import context
 from sqlalchemy import engine_from_config, pool
 
 from app.infrastructure.config import Config
-from app.infrastructure.databases.postgres.main import setup_table_mappers
 from app.infrastructure.databases.postgres.tables import mapper_registry
 
 config = context.config
@@ -15,7 +14,7 @@ if config.config_file_name is not None:
 
 config.set_main_option("sqlalchemy.url", app_config.postgres.postgres_url + "?async_fallback=True")
 
-setup_table_mappers()
+
 target_metadata = mapper_registry.metadata
 
 

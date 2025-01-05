@@ -1,9 +1,8 @@
-from sqlalchemy import delete, insert, update
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncConnection
 
 from app.domain.model.user.user import User
 from app.infrastructure.databases.postgres.gateways.generic_datamapper import GenericDataMapper
-from app.infrastructure.databases.postgres.tables import user_table
 
 
 class UserDataMapper(GenericDataMapper[User]):
@@ -11,39 +10,52 @@ class UserDataMapper(GenericDataMapper[User]):
         self.connection = connection
 
     async def save(self, entity: User) -> None:
-        stmt = insert(user_table).values(
+        stmt = text(
+            """
+            INSERT INTO users (user_id, firstname, lastname, middlename, email, phone, status, created_at, deleted_at)
+            VALUES (:user_id, :firstname, :lastname, :middlename, :email, :phone, :status, :created_at, :deleted_at)
+            """
+        ).bindparams(
             user_id=entity.user_id,
             firstname=entity.fullname.firstname,
             lastname=entity.fullname.lastname,
             middlename=entity.fullname.middlename,
             email=entity.contacts.email,
             phone=entity.contacts.phone,
+            status=entity.status,
             created_at=entity.created_at,
             deleted_at=entity.deleted_at,
-            status=entity.status,
         )
 
         await self.connection.execute(stmt)
 
     async def update(self, entity: User) -> None:
-        stmt = (
-            update(user_table)
-            .where(user_table.c.user_id == entity.user_id)
-            .values(
-                firstname=entity.fullname.firstname,
-                lastname=entity.fullname.lastname,
-                middlename=entity.fullname.middlename,
-                email=entity.contacts.email,
-                phone=entity.contacts.phone,
-                created_at=entity.created_at,
-                deleted_at=entity.deleted_at,
-                status=entity.status,
-            )
+        stmt = text(
+            """
+            UPDATE users
+            SET (user_id, firstname, lastname, middlename, email, phone, status, created_at, deleted_at)
+            VALUES (:user_id, :firstname, :lastname, :middlename, :email, :phone, :status, :created_at, :deleted_at)
+            WHERE user_id = :user_id
+            """
+        ).bindparams(
+            user_id=entity.user_id,
+            firstname=entity.fullname.firstname,
+            lastname=entity.fullname.lastname,
+            middlename=entity.fullname.middlename,
+            email=entity.contacts.email,
+            phone=entity.contacts.phone,
+            status=entity.status,
+            created_at=entity.created_at,
+            deleted_at=entity.deleted_at,
         )
 
         await self.connection.execute(stmt)
 
     async def delete(self, entity: User) -> None:
-        stmt = delete(user_table).where(user_table.c.user_id == entity.user_id)
+        stmt = text(
+            """
+            DELETE FROM users WHERE user_id = :user_id
+            """
+        ).bindparams(user_id=entity.user_id)
 
         await self.connection.execute(stmt)
