@@ -113,6 +113,7 @@ class User(BaseEntity[UUID]):
             raise UserTemporarilyDeletedError(message=f"User with id: {self.user_id} is temporarily deleted")
 
         self.status = Statuses.ACTIVE
+        self.unit_of_work.register_dirty(self)
         self.record_event(UserActivated(user_id=self.user_id, status=self.status))
 
     def change_fullname(self, firstname: str, lastname: str, middlename: str | None) -> None:
@@ -123,6 +124,7 @@ class User(BaseEntity[UUID]):
             raise InactiveUserError(message=f"User with id: {self.user_id} is inactive")
 
         self.fullname = Fullname(firstname, lastname, middlename)
+        self.unit_of_work.register_dirty(self)
         self.record_event(FullnameChanged(user_id=self.user_id, firstname=firstname, lastname=lastname, middlename=middlename))
 
     def change_contacts(self, email: str | None, phone: int | None) -> None:
@@ -133,6 +135,7 @@ class User(BaseEntity[UUID]):
             raise InactiveUserError(message=f"User with id: {self.user_id} is inactive")
 
         self.contacts = Contacts(email, phone)
+        self.unit_of_work.register_dirty(self)
         self.record_event(ContactsChanged(user_id=self.user_id, email=email, phone=phone))
 
     def delete_user_temporarily(self) -> None:
@@ -144,6 +147,7 @@ class User(BaseEntity[UUID]):
 
         self.status = Statuses.DELETED
         self.deleted_at = datetime.now(UTC)
+        self.unit_of_work.register_dirty(self)
         self.record_event(UserTemporarilyDeleted(user_id=self.user_id, deleted_at=self.deleted_at, status=self.status))
 
     def recovery_user(self) -> None:
@@ -155,6 +159,7 @@ class User(BaseEntity[UUID]):
 
         self.status = Statuses.ACTIVE
         self.deleted_at = None
+        self.unit_of_work.register_dirty(self)
         self.record_event(UserRecoveried(user_id=self.user_id, status=self.status))
 
     def delete_user_permanently(self) -> None:

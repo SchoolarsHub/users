@@ -17,9 +17,6 @@ class UserRepositoryImpl(UserRepository):
     def delete(self, user: User) -> None:
         self.unit_of_work.register_deleted(user)
 
-    def update(self, user: User) -> None:
-        self.unit_of_work.register_dirty(user)
-
     async def with_id(self, user_id: UUID) -> User | None:
         return await self.user_finder.get_by_id(user_id)
 

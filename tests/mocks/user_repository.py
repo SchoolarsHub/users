@@ -15,9 +15,6 @@ class FakeUserRepository(UserRepository):
     def add(self, user: User) -> None:
         self.unit_of_work.register_new(entity=user)
 
-    def update(self, user: User) -> None:
-        self.unit_of_work.register_dirty(entity=user)
-
     def delete(self, user: User) -> None:
         self.unit_of_work.register_deleted(entity=user)
 

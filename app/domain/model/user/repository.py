@@ -11,10 +11,6 @@ class UserRepository(Protocol):
         raise NotImplementedError
 
     @abstractmethod
-    def update(self, user: User) -> None:
-        raise NotImplementedError
-
-    @abstractmethod
     def delete(self, user: User) -> None:
         raise NotImplementedError
 
