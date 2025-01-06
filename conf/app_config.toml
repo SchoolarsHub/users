@@ -1,0 +1,15 @@
+[postgres]
+host = 'localhost'
+port = 5432
+user = 'postgres'
+password = 'postgres'
+database = 'postgres'
+
+
+[rabbit]
+host = 'localhost'
+port = 5672
+username = 'guest'
+password = 'guest'
+queue = 'users'
+exchange = 'users'
