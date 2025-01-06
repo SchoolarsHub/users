@@ -15,9 +15,8 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     yield
 
 
-def app_factory() -> FastAPI:
-    app = FastAPI(lifespan=lifespan)
-    config = Config()
+def main(app: FastAPI) -> None:
+    config = Config.load_variables()
     registry = Registry()
     container = setup_async_container(registry, config)
 
@@ -25,5 +24,10 @@ def app_factory() -> FastAPI:
     setup_exc_handlers(app=app)
     setup_middlewares(app=app)
     setup_routers(app=app)
+
+
+def app_factory() -> FastAPI:
+    app = FastAPI(lifespan=lifespan)
+    main(app)
 
     return app
