@@ -4,6 +4,7 @@ from dishka.integrations.fastapi import FromDishka, inject
 from fastapi import APIRouter
 from starlette import status
 
+from app.application.common.dto.user_dto import UserDTO
 from app.application.operations.command.change_contacts import ChangeContacts, ChangeContactsCommand
 from app.application.operations.command.change_fullname import ChangeFullname, ChangeFullnameCommand
 from app.application.operations.command.change_social_network_connection_reason import (
@@ -16,6 +17,7 @@ from app.application.operations.command.delete_user_temporarily import DeleteUse
 from app.application.operations.command.link_social_network import LinkSocialNetwork, LinkSocialNetworkCommand
 from app.application.operations.command.recovery_user import RecoveryUser, RecoveryUserCommand
 from app.application.operations.command.unlink_social_network import UnlinkSocialNetwork, UnlinkSocialNetworkCommand
+from app.application.operations.query.get_user_by_id import GetUserById, GetUserByIdQuery
 from app.domain.model.linked_account.exceptions import (
     ConnectionLinkNotBelongsToSocialNetworkError,
     InvalidSocialNetworkError,
@@ -303,3 +305,20 @@ async def change_social_network_connection_reason(
 ) -> SuccessResponse:
     await handler.execute(command=command)
     return SuccessResponse(status=status.HTTP_200_OK)
+
+
+@router.get(
+    "/{user_id}",
+    responses={
+        status.HTTP_200_OK: {
+            "model": SuccessResponse[UserDTO | None],
+            "description": "User found successfully",
+        },
+    },
+    status_code=status.HTTP_200_OK,
+)
+@inject
+async def get_user_by_id(user_id: UUID, handler: FromDishka[GetUserById]) -> SuccessResponse[UserDTO | None]:
+    query = GetUserByIdQuery(user_id=user_id)
+    result = await handler.execute(query=query)
+    return SuccessResponse(status=status.HTTP_200_OK, result=result)

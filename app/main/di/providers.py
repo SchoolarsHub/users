@@ -1,11 +1,9 @@
-from ssl import SSLContext
-
 from dishka import AnyOf, AsyncContainer, Provider, Scope, make_async_container
-from faststream.kafka.annotations import KafkaBroker
-from faststream.security import SASLPlaintext
+from faststream.rabbit.annotations import RabbitBroker
 from sqlalchemy.ext.asyncio import AsyncConnection, AsyncEngine
 
 from app.application.common.event_bus import EventBus
+from app.application.common.persistence.user_gateway import UserGateway
 from app.application.common.unit_of_work import UnitOfWork
 from app.application.operations.command.change_contacts import ChangeContacts
 from app.application.operations.command.change_fullname import ChangeFullname
@@ -16,17 +14,18 @@ from app.application.operations.command.delete_user_temporarily import DeleteUse
 from app.application.operations.command.link_social_network import LinkSocialNetwork
 from app.application.operations.command.recovery_user import RecoveryUser
 from app.application.operations.command.unlink_social_network import UnlinkSocialNetwork
+from app.application.operations.query.get_user_by_id import GetUserById
 from app.domain.model.user.factory import UserFactory
 from app.domain.model.user.repository import UserRepository
 from app.domain.shared.unit_of_work import UnitOfWorkTracker
-from app.infrastructure.brokers.kafka.config import KafkaConfig
-from app.infrastructure.brokers.kafka.main import setup_kafka_broker
-from app.infrastructure.brokers.kafka.publisher import MessagePublisherImpl
-from app.infrastructure.brokers.kafka.security import setup_kafka_security, setup_ssl_context
 from app.infrastructure.brokers.publisher import MessagePublisher
+from app.infrastructure.brokers.rabbit.config import RabbitConfig
+from app.infrastructure.brokers.rabbit.main import AMQPBroker, setup_amqp_broker
+from app.infrastructure.brokers.rabbit.publisher import MessagePublisherImpl
 from app.infrastructure.config import Config
 from app.infrastructure.databases.postgres.config import PostgresConfig
 from app.infrastructure.databases.postgres.gateways.user_finder import UserFinder
+from app.infrastructure.databases.postgres.gateways.user_reader import UserReader
 from app.infrastructure.databases.postgres.gateways.user_repository import UserRepositoryImpl
 from app.infrastructure.databases.postgres.main import setup_datamappers, setup_sqla_connection, setup_sqla_engine
 from app.infrastructure.databases.postgres.registry import Registry
@@ -43,7 +42,7 @@ def setup_async_container(registry: Registry, config: Config) -> AsyncContainer:
     return make_async_container(
         provider,
         context={
-            KafkaConfig: config.kafka,
+            RabbitConfig: config.rabbit,
             PostgresConfig: config.postgres,
             Registry: registry,
         },
@@ -58,10 +57,11 @@ def setup_provider(provider: Provider) -> None:
     provide_db_uow(provider=provider)
     provide_db_factories(provider=provider)
     provide_config(provider=provider)
+    provide_query_handlers(provider=provider)
 
 
 def provide_config(provider: Provider) -> None:
-    provider.from_context(scope=Scope.APP, provides=KafkaConfig)
+    provider.from_context(scope=Scope.APP, provides=RabbitConfig)
     provider.from_context(scope=Scope.APP, provides=PostgresConfig)
 
 
@@ -77,10 +77,13 @@ def provide_command_handlers(provider: Provider) -> None:
     provider.provide(RecoveryUser, scope=Scope.REQUEST)
 
 
+def provide_query_handlers(provider: Provider) -> None:
+    provider.provide(GetUserById, scope=Scope.REQUEST)
+
+
 def provide_broker(provider: Provider) -> None:
-    provider.provide(setup_kafka_broker, scope=Scope.APP, provides=KafkaBroker)
-    provider.provide(setup_kafka_security, scope=Scope.APP, provides=SASLPlaintext)
-    provider.provide(setup_ssl_context, scope=Scope.APP, provides=SSLContext)
+    provider.provide(AMQPBroker, scope=Scope.APP, provides=AMQPBroker)
+    provider.provide(setup_amqp_broker, scope=Scope.APP, provides=RabbitBroker)
 
 
 def provide_event_bus(provider: Provider) -> None:
@@ -102,3 +105,4 @@ def provide_db_factories(provider: Provider) -> None:
     provider.provide(UserRepositoryImpl, scope=Scope.REQUEST, provides=UserRepository)
     provider.provide(UserFactory, scope=Scope.REQUEST, provides=UserFactory)
     provider.provide(UserFinder, scope=Scope.REQUEST, provides=UserFinder)
+    provider.provide(UserReader, scope=Scope.REQUEST, provides=UserGateway)

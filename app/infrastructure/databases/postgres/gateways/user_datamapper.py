@@ -33,8 +33,14 @@ class UserDataMapper(GenericDataMapper[User]):
         stmt = text(
             """
             UPDATE users
-            SET (user_id, firstname, lastname, middlename, email, phone, status, created_at, deleted_at)
-            VALUES (:user_id, :firstname, :lastname, :middlename, :email, :phone, :status, :created_at, :deleted_at)
+            SET firstname = :firstname,
+                lastname = :lastname,
+                middlename = :middlename,
+                email = :email,
+                phone = :phone,
+                status = :status,
+                created_at = :created_at,
+                deleted_at = :deleted_at
             WHERE user_id = :user_id
             """
         ).bindparams(

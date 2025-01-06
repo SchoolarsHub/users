@@ -29,71 +29,31 @@ from app.infrastructure.event_bus.integration_events.user_events import (
 def convert_domain_event_to_integration(event: Event) -> IntegrationEvent:
     match event:
         case UserCreated():
-            return UserCreatedIntegration(
-                user_id=event.user_id,
-                firstname=event.firstname,
-                lastname=event.lastname,
-                middlename=event.middlename,
-                status=event.status,
-                event_uuid=event.event_uuid,
-                event_occured_at=event.event_occured_at,
-            )
+            return UserCreatedIntegration.from_domain_event(event)
 
         case UserPermanentlyDeleted():
-            return UserPermanentlyDeletedIntegration(user_id=event.user_id, event_uuid=event.event_uuid, event_occured_at=event.event_occured_at)
+            return UserPermanentlyDeletedIntegration.from_domain_event(event)
 
         case UserRecoveried():
-            return UserRecoveriedIntegration(
-                user_id=event.user_id, status=event.status, event_uuid=event.event_uuid, event_occured_at=event.event_occured_at
-            )
+            return UserRecoveriedIntegration.from_domain_event(event)
 
         case UserTemporarilyDeleted():
-            return UserTemporarilyDeletedIntegration(
-                user_id=event.user_id,
-                status=event.status,
-                deleted_at=event.deleted_at,
-                event_uuid=event.event_uuid,
-                event_occured_at=event.event_occured_at,
-            )
+            return UserTemporarilyDeletedIntegration.from_domain_event(event)
 
         case UserActivated():
-            return UserActivatedIntegration(
-                user_id=event.user_id, status=event.status, event_uuid=event.event_uuid, event_occured_at=event.event_occured_at
-            )
+            return UserActivatedIntegration.from_domain_event(event)
 
         case FullnameChanged():
-            return FullnameChangedIntegration(
-                user_id=event.user_id,
-                firstname=event.firstname,
-                lastname=event.lastname,
-                middlename=event.middlename,
-                event_uuid=event.event_uuid,
-                event_occured_at=event.event_occured_at,
-            )
+            return FullnameChangedIntegration.from_domain_event(event)
 
         case ContactsChanged():
-            return ContactsChangedIntegration(
-                user_id=event.user_id, email=event.email, phone=event.phone, event_uuid=event.event_uuid, event_occured_at=event.event_occured_at
-            )
+            return ContactsChangedIntegration.from_domain_event(event)
 
         case LinkedAccountCreated():
-            return LinkedAccountCreatedIntegration(
-                linked_account_id=event.linked_account_id,
-                social_network=event.social_network,
-                connected_for=event.connected_for,
-                event_uuid=event.event_uuid,
-                event_occured_at=event.event_occured_at,
-            )
+            return LinkedAccountCreatedIntegration.from_domain_event(event)
 
         case LinkedAccountDeleted():
-            return LinkedAccountDeletedIntegration(
-                linked_account_id=event.linked_account_id, event_uuid=event.event_uuid, event_occured_at=event.event_occured_at
-            )
+            return LinkedAccountDeletedIntegration.from_domain_event(event)
 
         case ConnectionReasonChanged():
-            return ConnectionReasonChangedIntegration(
-                linked_account_id=event.linked_account_id,
-                connected_for=event.connected_for,
-                event_uuid=event.event_uuid,
-                event_occured_at=event.event_occured_at,
-            )
+            return ConnectionReasonChangedIntegration.from_domain_event(event)
