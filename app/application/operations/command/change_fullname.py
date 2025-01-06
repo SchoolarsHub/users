@@ -29,6 +29,5 @@ class ChangeFullname:
 
         user.change_fullname(command.firstname, command.lastname, command.middlename)
 
-        self.repository.update(user)
         await self.event_bus.publish(events=user.raise_events())
         await self.unit_of_work.commit()
