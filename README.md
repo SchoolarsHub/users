@@ -605,14 +605,14 @@ curl -X 'GET' \
 - [FastAPI](https://fastapi.tiangolo.com/) — Асинхронный веб-фреймворк;
 - [SQLAlchemy](https://docs.sqlalchemy.org/en/20/) — ORM для работы с базами данных;
 - [asyncpg](https://asyncpg.org/) — Асинхронный драйвер для PostgreSQL;
-- [dishka](https://github.com/andreahub/dishka)— Библиотека для работы с конфигурациями и параметрами приложения;
+- [dishka](https://github.com/reagento/dishka)— Библиотека для работы с конфигурациями и параметрами приложения;
 - [pre-commit](https://pre-commit.com/) — Инструмент для управления хуками Git;
 - [pytest](https://pytest.org/) — Фреймворк для тестирования на Python;
 - [uvicorn](https://www.uvicorn.org/) — Асинхронный сервер для запуска приложений на основе ASGI;
 - [Alembic](https://alembic.sqlalchemy.org/en/latest/) — Инструмент для миграции схемы базы данных;
 - [faststream](https://faststream.dev/) — Библиотека для работы с асинхронными потоками и очередями;
 - [gunicorn](https://gunicorn.org/)  — WSGI HTTP сервер для UNIX;
-- [adaptix](https://dataclass-factory.readthedocs.io/en/3.x-develop/) — Библиотека для простой сериализации и сопоставления моделей.
+- [adaptix](https://github.com/reagento/adaptix) — Библиотека для простой сериализации и сопоставления моделей.
 
 ### CI/CD
 
