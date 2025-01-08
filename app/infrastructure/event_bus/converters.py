@@ -1,6 +1,6 @@
 from app.domain.model.linked_account.events import ConnectionReasonChanged, LinkedAccountCreated, LinkedAccountDeleted
 from app.domain.model.user.events import (
-    ContactsChanged,
+    EmailChanged,
     FullnameChanged,
     UserActivated,
     UserCreated,
@@ -16,7 +16,7 @@ from app.infrastructure.event_bus.integration_events.linked_account_events impor
     LinkedAccountDeletedIntegration,
 )
 from app.infrastructure.event_bus.integration_events.user_events import (
-    ContactsChangedIntegration,
+    EmailChangedIntegration,
     FullnameChangedIntegration,
     UserActivatedIntegration,
     UserCreatedIntegration,
@@ -46,8 +46,8 @@ def convert_domain_event_to_integration(event: Event) -> IntegrationEvent:
         case FullnameChanged():
             return FullnameChangedIntegration.from_domain_event(event)
 
-        case ContactsChanged():
-            return ContactsChangedIntegration.from_domain_event(event)
+        case EmailChanged():
+            return EmailChangedIntegration.from_domain_event(event)
 
         case LinkedAccountCreated():
             return LinkedAccountCreatedIntegration.from_domain_event(event)

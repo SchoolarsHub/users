@@ -12,16 +12,14 @@ class UserDataMapper(GenericDataMapper[User]):
     async def save(self, entity: User) -> None:
         stmt = text(
             """
-            INSERT INTO users (user_id, firstname, lastname, middlename, email, phone, status, created_at, deleted_at)
-            VALUES (:user_id, :firstname, :lastname, :middlename, :email, :phone, :status, :created_at, :deleted_at)
+            INSERT INTO users (user_id, firstname, lastname, email, status, created_at, deleted_at)
+            VALUES (:user_id, :firstname, :lastname, :email, :status, :created_at, :deleted_at)
             """
         ).bindparams(
             user_id=entity.user_id,
             firstname=entity.fullname.firstname,
             lastname=entity.fullname.lastname,
-            middlename=entity.fullname.middlename,
-            email=entity.contacts.email,
-            phone=entity.contacts.phone,
+            email=entity.email,
             status=entity.status,
             created_at=entity.created_at,
             deleted_at=entity.deleted_at,
@@ -35,9 +33,7 @@ class UserDataMapper(GenericDataMapper[User]):
             UPDATE users
             SET firstname = :firstname,
                 lastname = :lastname,
-                middlename = :middlename,
                 email = :email,
-                phone = :phone,
                 status = :status,
                 created_at = :created_at,
                 deleted_at = :deleted_at
@@ -47,9 +43,7 @@ class UserDataMapper(GenericDataMapper[User]):
             user_id=entity.user_id,
             firstname=entity.fullname.firstname,
             lastname=entity.fullname.lastname,
-            middlename=entity.fullname.middlename,
-            email=entity.contacts.email,
-            phone=entity.contacts.phone,
+            email=entity.email,
             status=entity.status,
             created_at=entity.created_at,
             deleted_at=entity.deleted_at,

@@ -1,8 +1,8 @@
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from uuid import UUID
 
-from app.domain.model.user.statuses import Statuses
+from app.domain.model.user.enums import Languages, Specializations, Statuses
 from app.domain.shared.event import Event
 
 
@@ -26,14 +26,12 @@ class FullnameChanged(Event):
     user_id: UUID
     firstname: str
     lastname: str
-    middlename: str | None
 
 
 @dataclass(frozen=True)
-class ContactsChanged(Event):
+class EmailChanged(Event):
     user_id: UUID
-    email: str | None
-    phone: int | None
+    email: str
 
 
 @dataclass(frozen=True)
@@ -52,3 +50,33 @@ class UserRecoveried(Event):
 @dataclass(frozen=True)
 class UserPermanentlyDeleted(Event):
     user_id: UUID
+
+
+@dataclass(frozen=True)
+class BioChanged(Event):
+    user_id: UUID
+    bio: str
+
+
+@dataclass(frozen=True)
+class DateOfBirthChanged(Event):
+    user_id: UUID
+    date_of_birth: date
+
+
+@dataclass(frozen=True)
+class LanguagesChanged(Event):
+    user_id: UUID
+    language: list[Languages]
+
+
+@dataclass(frozen=True)
+class SkillsChanged(Event):
+    user_id: UUID
+    skills: list[str]
+
+
+@dataclass(frozen=True)
+class SpecializationChanged(Event):
+    user_id: UUID
+    specialization: Specializations

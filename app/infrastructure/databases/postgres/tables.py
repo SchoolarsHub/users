@@ -1,4 +1,4 @@
-from sqlalchemy import UUID, BigInteger, Column, DateTime, ForeignKey, MetaData, String, Table
+from sqlalchemy import UUID, Column, DateTime, ForeignKey, MetaData, String, Table
 from sqlalchemy.orm import registry
 
 metadata = MetaData()
@@ -13,7 +13,6 @@ user_table = Table(
     Column("lastname", String(50), nullable=False),
     Column("middlename", String(50), nullable=True),
     Column("email", String(50), nullable=True, unique=True),
-    Column("phone", BigInteger, nullable=True, unique=True),
     Column("status", String(50), nullable=False),
     Column("created_at", DateTime(timezone=True), nullable=False),
     Column("deleted_at", DateTime(timezone=True), nullable=True),

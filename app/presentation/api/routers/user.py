@@ -5,27 +5,14 @@ from fastapi import APIRouter
 from starlette import status
 
 from app.application.common.dto.user_dto import UserDTO
-from app.application.operations.command.change_contacts import ChangeContacts, ChangeContactsCommand
+from app.application.operations.command.change_email import ChangeEmail, ChangeEmailCommand
 from app.application.operations.command.change_fullname import ChangeFullname, ChangeFullnameCommand
-from app.application.operations.command.change_social_network_connection_reason import (
-    ChangeSocialNetworkConnectionReason,
-    ChangeSocialNetworkConnectionReasonCommand,
-)
 from app.application.operations.command.create_user import CreateUser, CreateUserCommand
 from app.application.operations.command.delete_user_permanently import DeleteUserPermanently, DeleteUserPermanentlyCommand
 from app.application.operations.command.delete_user_temporarily import DeleteUserTemporarily, DeleteUserTemporarilyCommand
-from app.application.operations.command.link_social_network import LinkSocialNetwork, LinkSocialNetworkCommand
 from app.application.operations.command.recovery_user import RecoveryUser, RecoveryUserCommand
-from app.application.operations.command.unlink_social_network import UnlinkSocialNetwork, UnlinkSocialNetworkCommand
 from app.application.operations.query.get_user_by_id import GetUserById, GetUserByIdQuery
-from app.domain.model.linked_account.exceptions import (
-    ConnectionLinkNotBelongsToSocialNetworkError,
-    InvalidSocialNetworkError,
-    LinkedAccountAlreadyExistsError,
-    LinkedAccountNotExistsError,
-)
 from app.domain.model.user.exceptions import (
-    ContactsValidationError,
     InactiveUserError,
     UserAlreadyActiveError,
     UserAlreadyExistsError,
@@ -47,10 +34,6 @@ router = APIRouter(prefix="/users", tags=["Users"])
         status.HTTP_409_CONFLICT: {
             "model": ErrorResponse[UserAlreadyExistsError],
             "description": "User already exists",
-        },
-        status.HTTP_422_UNPROCESSABLE_ENTITY: {
-            "model": ErrorResponse[ContactsValidationError],
-            "description": "Invalid contacts",
         },
     },
     status_code=status.HTTP_201_CREATED,
@@ -166,11 +149,11 @@ async def change_fullname(command: ChangeFullnameCommand, handler: FromDishka[Ch
 
 
 @router.put(
-    "/change-contacts",
+    "/change-email",
     responses={
         status.HTTP_200_OK: {
             "model": SuccessResponse,
-            "description": "Contacts changed successfully",
+            "description": "Email changed successfully",
         },
         status.HTTP_400_BAD_REQUEST: {
             "model": ErrorResponse[InactiveUserError],
@@ -188,121 +171,11 @@ async def change_fullname(command: ChangeFullnameCommand, handler: FromDishka[Ch
             "model": ErrorResponse[UserNotFoundError],
             "description": "User not found",
         },
-        status.HTTP_422_UNPROCESSABLE_ENTITY: {
-            "model": ErrorResponse[ContactsValidationError],
-            "description": "Invalid contacts",
-        },
     },
     status_code=status.HTTP_200_OK,
 )
 @inject
-async def change_contacts(command: ChangeContactsCommand, handler: FromDishka[ChangeContacts]) -> SuccessResponse:
-    await handler.execute(command=command)
-    return SuccessResponse(status=status.HTTP_200_OK)
-
-
-@router.post(
-    "/link-social-network",
-    responses={
-        status.HTTP_201_CREATED: {
-            "model": SuccessResponse[UUID],
-            "description": "Social network linked successfully",
-        },
-        status.HTTP_400_BAD_REQUEST: {
-            "model": ErrorResponse[InactiveUserError],
-            "description": "User is inactive",
-        },
-        status.HTTP_400_BAD_REQUEST: {
-            "model": ErrorResponse[UserTemporarilyDeletedError],
-            "description": "User is temporarily deleted",
-        },
-        status.HTTP_409_CONFLICT: {
-            "model": ErrorResponse[LinkedAccountAlreadyExistsError],
-            "description": "Linked account already exists",
-        },
-        status.HTTP_422_UNPROCESSABLE_ENTITY: {
-            "model": ErrorResponse[InvalidSocialNetworkError],
-            "description": "Invalid social network",
-        },
-        status.HTTP_422_UNPROCESSABLE_ENTITY: {
-            "model": ErrorResponse[ConnectionLinkNotBelongsToSocialNetworkError],
-            "description": "Connection link not belongs to social network",
-        },
-        status.HTTP_404_NOT_FOUND: {
-            "model": ErrorResponse[UserNotFoundError],
-            "description": "User not found",
-        },
-    },
-    status_code=status.HTTP_201_CREATED,
-)
-@inject
-async def link_social_network(command: LinkSocialNetworkCommand, handler: FromDishka[LinkSocialNetwork]) -> SuccessResponse[UUID]:
-    result = await handler.execute(command=command)
-    return SuccessResponse(status=status.HTTP_201_CREATED, result=result)
-
-
-@router.delete(
-    "/unlink-social-network",
-    responses={
-        status.HTTP_200_OK: {
-            "model": SuccessResponse,
-            "description": "Social network unlinked successfully",
-        },
-        status.HTTP_400_BAD_REQUEST: {
-            "model": ErrorResponse[InactiveUserError],
-            "description": "User is inactive",
-        },
-        status.HTTP_400_BAD_REQUEST: {
-            "model": ErrorResponse[UserTemporarilyDeletedError],
-            "description": "User is temporarily deleted",
-        },
-        status.HTTP_404_NOT_FOUND: {
-            "model": ErrorResponse[LinkedAccountNotExistsError],
-            "description": "Linked account not exists",
-        },
-        status.HTTP_404_NOT_FOUND: {
-            "model": ErrorResponse[UserNotFoundError],
-            "description": "User not found",
-        },
-    },
-    status_code=status.HTTP_200_OK,
-)
-@inject
-async def unlink_social_network(command: UnlinkSocialNetworkCommand, handler: FromDishka[UnlinkSocialNetwork]) -> SuccessResponse:
-    await handler.execute(command=command)
-    return SuccessResponse(status=status.HTTP_200_OK)
-
-
-@router.put(
-    "/change-social-network-connection-reason",
-    responses={
-        status.HTTP_200_OK: {
-            "model": SuccessResponse,
-            "description": "Social network connection reason changed successfully",
-        },
-        status.HTTP_400_BAD_REQUEST: {
-            "model": ErrorResponse[InactiveUserError],
-            "description": "User is inactive",
-        },
-        status.HTTP_400_BAD_REQUEST: {
-            "model": ErrorResponse[UserTemporarilyDeletedError],
-            "description": "User is temporarily deleted",
-        },
-        status.HTTP_404_NOT_FOUND: {
-            "model": ErrorResponse[LinkedAccountNotExistsError],
-            "description": "Linked account not exists",
-        },
-        status.HTTP_404_NOT_FOUND: {
-            "model": ErrorResponse[UserNotFoundError],
-            "description": "User not found",
-        },
-    },
-    status_code=status.HTTP_200_OK,
-)
-@inject
-async def change_social_network_connection_reason(
-    command: ChangeSocialNetworkConnectionReasonCommand, handler: FromDishka[ChangeSocialNetworkConnectionReason]
-) -> SuccessResponse:
+async def change_email(command: ChangeEmailCommand, handler: FromDishka[ChangeEmail]) -> SuccessResponse:
     await handler.execute(command=command)
     return SuccessResponse(status=status.HTTP_200_OK)
 

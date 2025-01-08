@@ -9,11 +9,9 @@ from app.domain.model.user.repository import UserRepository
 
 @dataclass(frozen=True)
 class CreateUserCommand:
-    phone: int | None
-    email: str | None
+    email: str
     firstname: str
     lastname: str
-    middlename: str | None
 
 
 class CreateUser:
@@ -24,7 +22,7 @@ class CreateUser:
         self.factory = factory
 
     async def execute(self, command: CreateUserCommand) -> UUID:
-        user = await self.factory.create_user(uuid4(), command.email, command.phone, command.firstname, command.lastname, command.middlename)
+        user = await self.factory.create_user(uuid4(), command.email, command.firstname, command.lastname)
 
         self.repository.add(user=user)
         await self.event_bus.publish(events=user.raise_events())

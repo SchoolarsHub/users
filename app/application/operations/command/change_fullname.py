@@ -12,7 +12,6 @@ class ChangeFullnameCommand:
     user_id: UUID
     firstname: str
     lastname: str
-    middlename: str | None
 
 
 class ChangeFullname:
@@ -27,7 +26,7 @@ class ChangeFullname:
         if not user:
             raise UserNotFoundError(message="User not found")
 
-        user.change_fullname(command.firstname, command.lastname, command.middlename)
+        user.change_fullname(command.firstname, command.lastname)
 
         await self.event_bus.publish(events=user.raise_events())
         await self.unit_of_work.commit()

@@ -3,7 +3,7 @@ from datetime import UTC, datetime
 from uuid import UUID
 
 from app.domain.model.user.events import (
-    ContactsChanged,
+    EmailChanged,
     FullnameChanged,
     UserActivated,
     UserCreated,
@@ -20,7 +20,6 @@ class UserCreatedIntegration(IntegrationEvent):
     user_id: UUID
     firstname: str
     lastname: str
-    middlename: str | None
     event_name: str = field(default="UserCreated")
     status: Statuses = field(default=Statuses.INACTIVE)
 
@@ -30,7 +29,6 @@ class UserCreatedIntegration(IntegrationEvent):
             user_id=event.user_id,
             firstname=event.firstname,
             lastname=event.lastname,
-            middlename=event.middlename,
             status=event.status,
             event_uuid=event.event_uuid,
             event_occured_at=event.event_occured_at,
@@ -55,7 +53,6 @@ class FullnameChangedIntegration(IntegrationEvent):
     user_id: UUID
     firstname: str
     lastname: str
-    middlename: str | None
     event_name: str = field(default="FullnameChanged")
 
     @staticmethod
@@ -64,24 +61,20 @@ class FullnameChangedIntegration(IntegrationEvent):
             user_id=event.user_id,
             firstname=event.firstname,
             lastname=event.lastname,
-            middlename=event.middlename,
             event_uuid=event.event_uuid,
             event_occured_at=event.event_occured_at,
         )
 
 
 @dataclass(frozen=True, kw_only=True)
-class ContactsChangedIntegration(IntegrationEvent):
+class EmailChangedIntegration(IntegrationEvent):
     user_id: UUID
-    email: str | None
-    phone: int | None
-    event_name: str = field(default="ContactsChanged")
+    email: str
+    event_name: str = field(default="EmailChanged")
 
     @staticmethod
-    def from_domain_event(event: ContactsChanged) -> "ContactsChangedIntegration":
-        return ContactsChangedIntegration(
-            user_id=event.user_id, email=event.email, phone=event.phone, event_uuid=event.event_uuid, event_occured_at=event.event_occured_at
-        )
+    def from_domain_event(event: EmailChanged) -> "EmailChangedIntegration":
+        return EmailChangedIntegration(user_id=event.user_id, email=event.email, event_uuid=event.event_uuid, event_occured_at=event.event_occured_at)
 
 
 @dataclass(frozen=True, kw_only=True)

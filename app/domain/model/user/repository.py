@@ -21,7 +21,3 @@ class UserRepository(Protocol):
     @abstractmethod
     async def with_email(self, email: str) -> User | None:
         raise NotImplementedError
-
-    @abstractmethod
-    async def with_phone(self, phone: int) -> User | None:
-        raise NotImplementedError

@@ -3,14 +3,7 @@ from functools import partial
 from fastapi import FastAPI
 from starlette import status
 
-from app.domain.model.linked_account.exceptions import (
-    ConnectionLinkNotBelongsToSocialNetworkError,
-    InvalidSocialNetworkError,
-    LinkedAccountAlreadyExistsError,
-    LinkedAccountNotExistsError,
-)
 from app.domain.model.user.exceptions import (
-    ContactsValidationError,
     InactiveUserError,
     UserAlreadyActiveError,
     UserAlreadyExistsError,
@@ -49,26 +42,6 @@ def setup_exc_handlers(app: FastAPI) -> None:
         partial(domain_error_handler, status_code=status.HTTP_400_BAD_REQUEST),
     )
     app.add_exception_handler(
-        ConnectionLinkNotBelongsToSocialNetworkError,
-        partial(domain_error_handler, status_code=status.HTTP_422_UNPROCESSABLE_ENTITY),
-    )
-    app.add_exception_handler(
-        InvalidSocialNetworkError,
-        partial(domain_error_handler, status_code=status.HTTP_422_UNPROCESSABLE_ENTITY),
-    )
-    app.add_exception_handler(
-        LinkedAccountAlreadyExistsError,
-        partial(domain_error_handler, status_code=status.HTTP_409_CONFLICT),
-    )
-    app.add_exception_handler(
-        LinkedAccountNotExistsError,
-        partial(domain_error_handler, status_code=status.HTTP_404_NOT_FOUND),
-    )
-    app.add_exception_handler(
         UserNotFoundError,
         partial(domain_error_handler, status_code=status.HTTP_404_NOT_FOUND),
-    )
-    app.add_exception_handler(
-        ContactsValidationError,
-        partial(domain_error_handler, status_code=status.HTTP_422_UNPROCESSABLE_ENTITY),
     )
