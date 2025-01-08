@@ -5,12 +5,12 @@ from fastapi import APIRouter
 from starlette import status
 
 from app.application.common.dto.user_dto import UserDTO
-from app.application.operations.command.change_email import ChangeEmail, ChangeEmailCommand
-from app.application.operations.command.change_fullname import ChangeFullname, ChangeFullnameCommand
-from app.application.operations.command.create_user import CreateUser, CreateUserCommand
-from app.application.operations.command.delete_user_permanently import DeleteUserPermanently, DeleteUserPermanentlyCommand
-from app.application.operations.command.delete_user_temporarily import DeleteUserTemporarily, DeleteUserTemporarilyCommand
-from app.application.operations.command.recovery_user import RecoveryUser, RecoveryUserCommand
+from app.application.operations.command.user.change_email import ChangeEmail, ChangeEmailCommand
+from app.application.operations.command.user.change_fullname import ChangeFullname, ChangeFullnameCommand
+from app.application.operations.command.user.create_user import CreateUser, CreateUserCommand
+from app.application.operations.command.user.delete_user_permanently import DeleteUserPermanently, DeleteUserPermanentlyCommand
+from app.application.operations.command.user.delete_user_temporarily import DeleteUserTemporarily, DeleteUserTemporarilyCommand
+from app.application.operations.command.user.recovery_user import RecoveryUser, RecoveryUserCommand
 from app.application.operations.query.get_user_by_id import GetUserById, GetUserByIdQuery
 from app.domain.model.user.exceptions import (
     InactiveUserError,

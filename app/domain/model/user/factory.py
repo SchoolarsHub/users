@@ -20,7 +20,7 @@ class UserFactory:
             raise UserAlreadyExistsError(message="User already exists")
 
         fullname = Fullname(firstname=firstname, lastname=lastname)
-        user = User(uuid4(), self.unit_of_work, fullname, email, Statuses.ACTIVE, [], datetime.now(UTC))
-        user.record_event(UserCreated(user.user_id, firstname, lastname, user.status))
+        user = User(uuid4(), self.unit_of_work, fullname, email, Statuses.ACTIVE, datetime.now(UTC))
+        user.record_event(UserCreated(user.user_id, firstname, lastname, email, user.status))
 
         return user

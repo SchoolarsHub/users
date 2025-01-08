@@ -51,10 +51,10 @@ class User(BaseEntity[UUID]):
         fullname: Fullname,
         email: str,
         status: Statuses,
-        specialization: Specializations,
         created_at: datetime,
-        bio: str,
-        date_of_birth: date,
+        bio: str | None = None,
+        specialization: Specializations | None = None,
+        date_of_birth: date | None = None,
         languages: list[Languages] | None = None,
         education: list[Education] | None = None,
         experiences: list[Experience] | None = None,
@@ -89,7 +89,7 @@ class User(BaseEntity[UUID]):
 
         return events
 
-    def change_bio(self, new_bio: str) -> None:
+    def change_bio(self, new_bio: str | None) -> None:
         if self.status == Statuses.DELETED:
             raise UserTemporarilyDeletedError(message=f"User with id: {self.user_id} is temporarily deleted")
 
@@ -100,7 +100,7 @@ class User(BaseEntity[UUID]):
         self.unit_of_work.register_dirty(self)
         self.record_event(BioChanged(user_id=self.user_id, bio=new_bio))
 
-    def change_date_of_birth(self, new_date_of_birth: date) -> None:
+    def change_date_of_birth(self, new_date_of_birth: date | None) -> None:
         if self.status == Statuses.DELETED:
             raise UserTemporarilyDeletedError(message=f"User with id: {self.user_id} is temporarily deleted")
 
@@ -111,7 +111,7 @@ class User(BaseEntity[UUID]):
         self.unit_of_work.register_dirty(self)
         self.record_event(DateOfBirthChanged(user_id=self.user_id, date_of_birth=new_date_of_birth))
 
-    def languages_changes(self, new_languages: list[Languages]) -> None:
+    def change_languages(self, new_languages: list[Languages]) -> None:
         if self.status == Statuses.DELETED:
             raise UserTemporarilyDeletedError(message=f"User with id: {self.user_id} is temporarily deleted")
 
@@ -133,7 +133,7 @@ class User(BaseEntity[UUID]):
         self.unit_of_work.register_dirty(self)
         self.record_event(SkillsChanged(user_id=self.user_id, skills=new_skills))
 
-    def change_specialization(self, specialization: Specializations) -> None:
+    def change_specialization(self, specialization: Specializations | None) -> None:
         if self.status == Statuses.DELETED:
             raise UserTemporarilyDeletedError(message=f"User with id: {self.user_id} is temporarily deleted")
 
@@ -144,7 +144,7 @@ class User(BaseEntity[UUID]):
         self.unit_of_work.register_dirty(self)
         self.record_event(SpecializationChanged(user_id=self.user_id, specialization=specialization))
 
-    def add_education(self, organization: str, degree: str, education_field: str, grade: str, start_date: date, finish_date: date) -> None:
+    def add_education(self, organization: str, degree: str, education_field: str, grade: str | None, start_date: date, finish_date: date) -> UUID:
         if self.status == Statuses.DELETED:
             raise UserTemporarilyDeletedError(message=f"User with id: {self.user_id} is temporarily deleted")
 
@@ -161,6 +161,8 @@ class User(BaseEntity[UUID]):
         self.record_event(
             EducationCreated(education.education_id, self.user_id, organization, degree, education_field, grade, start_date, finish_date)
         )
+
+        return education.education_id
 
     def change_education_organization(self, education_id: UUID, new_organization: str) -> None:
         if self.status == Statuses.DELETED:
@@ -246,7 +248,7 @@ class User(BaseEntity[UUID]):
 
         raise EducationNotFoundError(f"Education with id: {education_id} not found")
 
-    def add_experience(self, specialization: Specializations, company_name: str, start_date: date, finish_date: date, description: str) -> None:
+    def add_experience(self, specialization: str, company_name: str, start_date: date, finish_date: date, description: str) -> UUID:
         if self.status == Statuses.DELETED:
             raise UserTemporarilyDeletedError(message=f"User with id: {self.user_id} is temporarily deleted")
 
@@ -263,6 +265,8 @@ class User(BaseEntity[UUID]):
         self.record_event(
             ExperienceCreated(experience.experience_id, self.user_id, specialization, company_name, description, start_date, finish_date)
         )
+
+        return experience.experience_id
 
     def change_experience_specialization(self, experience_id: UUID, new_specialization: str) -> None:
         if self.status == Statuses.DELETED:

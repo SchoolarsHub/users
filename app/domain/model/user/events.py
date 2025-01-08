@@ -11,7 +11,7 @@ class UserCreated(Event):
     user_id: UUID
     firstname: str
     lastname: str
-    middlename: str | None
+    email: str
     status: Statuses = field(default=Statuses.INACTIVE)
 
 
@@ -55,13 +55,13 @@ class UserPermanentlyDeleted(Event):
 @dataclass(frozen=True)
 class BioChanged(Event):
     user_id: UUID
-    bio: str
+    bio: str | None = field(default=None)
 
 
 @dataclass(frozen=True)
 class DateOfBirthChanged(Event):
     user_id: UUID
-    date_of_birth: date
+    date_of_birth: date | None = field(default=None)
 
 
 @dataclass(frozen=True)
@@ -79,4 +79,4 @@ class SkillsChanged(Event):
 @dataclass(frozen=True)
 class SpecializationChanged(Event):
     user_id: UUID
-    specialization: Specializations
+    specialization: Specializations | None = field(default=None)
