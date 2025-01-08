@@ -16,7 +16,7 @@ class UserFactory:
         self.unit_of_work = unit_of_work
 
     async def create_user(self, email: str, firstname: str, lastname: str) -> User:
-        if email and await self.repository.with_email(email):
+        if await self.repository.with_email(email):
             raise UserAlreadyExistsError(message="User already exists")
 
         fullname = Fullname(firstname=firstname, lastname=lastname)

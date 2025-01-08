@@ -396,9 +396,6 @@ class User(BaseEntity[UUID]):
         self.record_event(UserRecoveried(user_id=self.user_id, status=self.status))
 
     def delete_user_permanently(self) -> None:
-        for linked_account in self.linked_accounts:
-            linked_account.delete_linked_account()
-
         for experience in self.experiences:
             experience.delete_experience()
 
