@@ -73,7 +73,7 @@ class User(BaseEntity[UUID]):
         self.bio = bio
         self.date_of_birth = date_of_birth
         self.languages = languages or []
-        self.specialization = specialization or []
+        self.specialization = specialization
         self.skills = skills or []
         self.education = education or []
         self.experiences = experiences or []
