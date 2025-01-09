@@ -5,34 +5,7 @@ from app.domain.model.entities.education import Education
 from app.domain.model.entities.experience import Experience
 from app.domain.model.enums.specializations import Specializations
 from app.domain.model.enums.statuses import Statuses
-from app.domain.model.events.education_events import (
-    EducationCreated,
-    EducationDegreeChanged,
-    EducationDeleted,
-    EducationFieldChanged,
-    EducationGradeChanged,
-    EducationOrganizationChanged,
-    EducationPeriodChanged,
-)
-from app.domain.model.events.experience_events import (
-    ExperienceCompanyNameChanged,
-    ExperienceCreated,
-    ExperienceDeleted,
-    ExperienceDescriptionChanged,
-    ExperiencePeriodChanged,
-    ExperienceSpecializationChanged,
-)
-from app.domain.model.events.user_events import (
-    BioChanged,
-    DateOfBirthChanged,
-    EmailChanged,
-    FullnameChanged,
-    SpecializationChanged,
-    UserActivated,
-    UserPermanentlyDeleted,
-    UserRecoveried,
-    UserTemporarilyDeleted,
-)
+from app.domain.model.events import education_events, experience_events, user_events
 from app.domain.model.exceptions.education_exceptions import EducationAlreadyExistsError, EducationNotFoundError
 from app.domain.model.exceptions.experience_exceptions import ExperienceAlreadyExistsError, ExperienceNotFoundError
 from app.domain.model.exceptions.user_exceptions import InactiveUserError, UserAlreadyActiveError, UserTemporarilyDeletedError
@@ -96,21 +69,21 @@ class User(BaseEntity[UUID]):
 
         self.bio = new_bio
         self.unit_of_work.register_dirty(self)
-        self.record_event(BioChanged(user_id=self.user_id, bio=new_bio))
+        self.record_event(user_events.BioChanged(user_id=self.user_id, bio=new_bio))
 
     def change_date_of_birth(self, new_date_of_birth: date | None) -> None:
         self.check_user_status()
 
         self.date_of_birth = new_date_of_birth
         self.unit_of_work.register_dirty(self)
-        self.record_event(DateOfBirthChanged(user_id=self.user_id, date_of_birth=new_date_of_birth))
+        self.record_event(user_events.DateOfBirthChanged(user_id=self.user_id, date_of_birth=new_date_of_birth))
 
     def change_specialization(self, specialization: Specializations | None) -> None:
         self.check_user_status()
 
         self.specialization = specialization
         self.unit_of_work.register_dirty(self)
-        self.record_event(SpecializationChanged(user_id=self.user_id, specialization=specialization))
+        self.record_event(user_events.SpecializationChanged(user_id=self.user_id, specialization=specialization))
 
     def add_education(self, organization: str, degree: str, education_field: str, grade: str | None, start_date: date, finish_date: date) -> UUID:
         self.check_user_status()
@@ -124,7 +97,9 @@ class User(BaseEntity[UUID]):
         self.unit_of_work.register_new(education)
         self.education.append(education)
         self.record_event(
-            EducationCreated(education.education_id, self.user_id, organization, degree, education_field, grade, start_date, finish_date)
+            education_events.EducationCreated(
+                education.education_id, self.user_id, organization, degree, education_field, grade, start_date, finish_date
+            )
         )
 
         return education.education_id
@@ -135,7 +110,7 @@ class User(BaseEntity[UUID]):
         for education in self.education:
             if education.education_id == education_id:
                 education.change_organization(new_organization)
-                self.record_event(EducationOrganizationChanged(education_id, self.user_id, new_organization))
+                self.record_event(education_events.EducationOrganizationChanged(education_id, self.user_id, new_organization))
 
         raise EducationNotFoundError(f"Education with id: {education_id} not found")
 
@@ -145,7 +120,7 @@ class User(BaseEntity[UUID]):
         for education in self.education:
             if education.education_id == education_id:
                 education.change_degree(new_degree)
-                self.record_event(EducationDegreeChanged(education_id, self.user_id, new_degree))
+                self.record_event(education_events.EducationDegreeChanged(education_id, self.user_id, new_degree))
 
         raise EducationNotFoundError(f"Education with id: {education_id} not found")
 
@@ -155,7 +130,7 @@ class User(BaseEntity[UUID]):
         for education in self.education:
             if education.education_id == education_id:
                 education.change_field(new_field)
-                self.record_event(EducationFieldChanged(education_id, self.user_id, new_field))
+                self.record_event(education_events.EducationFieldChanged(education_id, self.user_id, new_field))
 
         raise EducationNotFoundError(f"Education with id: {education_id} not found")
 
@@ -165,7 +140,7 @@ class User(BaseEntity[UUID]):
         for education in self.education:
             if education.education_id == education_id:
                 education.change_grade(new_garde)
-                self.record_event(EducationGradeChanged(education_id, self.user_id, new_garde))
+                self.record_event(education_events.EducationGradeChanged(education_id, self.user_id, new_garde))
 
         raise EducationNotFoundError(f"Education with id: {education_id} not found")
 
@@ -175,7 +150,7 @@ class User(BaseEntity[UUID]):
         for education in self.education:
             if education.education_id == education_id:
                 education.change_period(start_date, finish_date)
-                self.record_event(EducationPeriodChanged(education_id, self.user_id, start_date, finish_date))
+                self.record_event(education_events.EducationPeriodChanged(education_id, self.user_id, start_date, finish_date))
 
         raise EducationNotFoundError(f"Education with id: {education_id} not found")
 
@@ -185,7 +160,7 @@ class User(BaseEntity[UUID]):
         for education in self.education:
             if education.education_id == education_id:
                 education.delete_education()
-                self.record_event(EducationDeleted(education_id, self.user_id))
+                self.record_event(education_events.EducationDeleted(education_id, self.user_id))
 
         raise EducationNotFoundError(f"Education with id: {education_id} not found")
 
@@ -201,7 +176,9 @@ class User(BaseEntity[UUID]):
         self.unit_of_work.register_new(experience)
         self.experiences.append(experience)
         self.record_event(
-            ExperienceCreated(experience.experience_id, self.user_id, specialization, company_name, description, start_date, finish_date)
+            experience_events.ExperienceCreated(
+                experience.experience_id, self.user_id, specialization, company_name, description, start_date, finish_date
+            )
         )
 
         return experience.experience_id
@@ -212,7 +189,7 @@ class User(BaseEntity[UUID]):
         for experience in self.experiences:
             if experience.experience_id == experience_id:
                 experience.change_specialization(new_specialization)
-                self.record_event(ExperienceSpecializationChanged(experience_id, self.user_id, new_specialization))
+                self.record_event(experience_events.ExperienceSpecializationChanged(experience_id, self.user_id, new_specialization))
 
         raise ExperienceNotFoundError(f"Experience with id: {experience_id} not found")
 
@@ -222,7 +199,7 @@ class User(BaseEntity[UUID]):
         for experience in self.experiences:
             if experience.experience_id == experience_id:
                 experience.change_company_name(new_company_name)
-                self.record_event(ExperienceCompanyNameChanged(experience_id, self.user_id, new_company_name))
+                self.record_event(experience_events.ExperienceCompanyNameChanged(experience_id, self.user_id, new_company_name))
 
         raise ExperienceNotFoundError(f"Experience with id: {experience_id} not found")
 
@@ -232,7 +209,7 @@ class User(BaseEntity[UUID]):
         for experience in self.experiences:
             if experience.experience_id == experience_id:
                 experience.change_period(new_start_date, new_finish_date)
-                self.record_event(ExperiencePeriodChanged(experience_id, self.user_id, new_start_date, new_finish_date))
+                self.record_event(experience_events.ExperiencePeriodChanged(experience_id, self.user_id, new_start_date, new_finish_date))
 
         raise ExperienceNotFoundError(f"Experience with id: {experience_id} not found")
 
@@ -242,7 +219,7 @@ class User(BaseEntity[UUID]):
         for experience in self.experiences:
             if experience.experience_id == experience_id:
                 experience.change_description(description)
-                self.record_event(ExperienceDescriptionChanged(experience_id, self.user_id, description))
+                self.record_event(experience_events.ExperienceDescriptionChanged(experience_id, self.user_id, description))
 
         raise ExperienceNotFoundError(f"Experience with id: {experience_id} not found")
 
@@ -252,7 +229,7 @@ class User(BaseEntity[UUID]):
         for experience in self.experiences:
             if experience.experience_id == experience_id:
                 experience.delete_experience()
-                self.record_event(ExperienceDeleted(experience_id, self.user_id))
+                self.record_event(experience_events.ExperienceDeleted(experience_id, self.user_id))
 
         raise ExperienceNotFoundError(f"Experience with id: {experience_id} not found")
 
@@ -261,21 +238,21 @@ class User(BaseEntity[UUID]):
 
         self.status = Statuses.ACTIVE
         self.unit_of_work.register_dirty(self)
-        self.record_event(UserActivated(user_id=self.user_id, status=self.status))
+        self.record_event(user_events.UserActivated(user_id=self.user_id, status=self.status))
 
     def change_fullname(self, firstname: str, lastname: str) -> None:
         self.check_user_status()
 
         self.fullname = Fullname(firstname, lastname)
         self.unit_of_work.register_dirty(self)
-        self.record_event(FullnameChanged(user_id=self.user_id, firstname=firstname, lastname=lastname))
+        self.record_event(user_events.FullnameChanged(user_id=self.user_id, firstname=firstname, lastname=lastname))
 
     def change_email(self, email: str) -> None:
         self.check_user_status()
 
         self.email = email
         self.unit_of_work.register_dirty(self)
-        self.record_event(EmailChanged(user_id=self.user_id, email=email))
+        self.record_event(user_events.EmailChanged(user_id=self.user_id, email=email))
 
     def delete_user_temporarily(self) -> None:
         self.check_user_status()
@@ -283,7 +260,7 @@ class User(BaseEntity[UUID]):
         self.status = Statuses.DELETED
         self.deleted_at = datetime.now(UTC)
         self.unit_of_work.register_dirty(self)
-        self.record_event(UserTemporarilyDeleted(user_id=self.user_id, deleted_at=self.deleted_at, status=self.status))
+        self.record_event(user_events.UserTemporarilyDeleted(user_id=self.user_id, deleted_at=self.deleted_at, status=self.status))
 
     def recovery_user(self) -> None:
         if self.status == Statuses.INACTIVE:
@@ -295,7 +272,7 @@ class User(BaseEntity[UUID]):
         self.status = Statuses.ACTIVE
         self.deleted_at = None
         self.unit_of_work.register_dirty(self)
-        self.record_event(UserRecoveried(user_id=self.user_id, status=self.status))
+        self.record_event(user_events.UserRecoveried(user_id=self.user_id, status=self.status))
 
     def delete_user_permanently(self) -> None:
         for experience in self.experiences:
@@ -304,4 +281,4 @@ class User(BaseEntity[UUID]):
         for education in self.education:
             education.delete_education()
 
-        self.record_event(UserPermanentlyDeleted(user_id=self.user_id))
+        self.record_event(user_events.UserPermanentlyDeleted(user_id=self.user_id))
