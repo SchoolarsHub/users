@@ -27,11 +27,6 @@ class SkillService:
         self.skill_repository.delete(user_skill)
 
     async def delete_all_user_skills(self, user_id: UUID) -> None:
-        user = await self.user_repository.with_id(user_id)
-
-        if not user:
-            raise UserNotFoundError(message=f"User with id: {user_id} not found")
-
         user_skills = await self.skill_repository.with_user_id(user_id)
 
         for user_skill in user_skills:
